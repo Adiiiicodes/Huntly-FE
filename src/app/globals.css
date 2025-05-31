@@ -3,27 +3,29 @@
 @tailwind utilities;
 
 :root {
-  --primary: #495356;      /* Professional gray */
-  --secondary: #111827;    /* Deep black */
-  --accent: #656469;       /* Medium gray */
-  --background: #0a0a0b;   /* Near black background */
-  --foreground: #e0e2e4;   /* Light gray text */
-  --card: #1a1a1c;         /* Card background */
-  --border: #2a2a2d;       /* Border color */
-  --success: #10b981;      /* Green for success states */
+  --primary: #656469;         
+  --secondary: #656469;
+  --background: #e0e2e4;
+  --accent: #656469;
+  --foreground: #242229;
+  --card: #1a1a1c;
+  --border: #2a2a2d;
+  --success: #10b981;
 }
+
 
 @media (prefers-color-scheme: light) {
   :root {
     --background: #fafafa;
-    --foreground: #0a0a0b;
+    --foreground: #242229;
     --card: #ffffff;
-    --border: #e5e5e7;
+    --border: #e0e2e4;
     --primary: #3a4144;
     --secondary: #1f2937;
     --accent: #545458;
   }
 }
+
 
 * {
   box-sizing: border-box;
@@ -51,10 +53,9 @@ body {
   }
 
   .search-input {
-    @apply w-full px-6 py-4 bg-background border border-border rounded-xl 
+    @apply w-full px-6 py-4 bg-[#242229] border border-border rounded-full 
            text-foreground placeholder-foreground/50 
-           focus:outline-none focus:border-accent focus:ring-2
-  }
+           focus:outline-none focus:ring-0;
   }
 
   .btn-primary {
@@ -71,30 +72,61 @@ body {
   }
 
   .gradient-text {
-    @apply bg-gradient-to-r from-primary via-accent to-foreground 
-           bg-clip-text text-transparent animate-gradient;
-  }
+  @apply bg-gradient-to-r from-[#242229] via-[#656469] to-[#656469] 
+         bg-clip-text text-transparent animate-gradient;
+}
+
 
   .glass-effect {
-    @apply bg-card/50 backdrop-blur-lg border border-border/50;
+    @apply bg-accent/30 backdrop-blur-lg border border-border/20;
   }
 
   .search-suggestion {
-    @apply px-4 py-3 text-sm bg-card/50 border border-border/30 
-           rounded-lg hover:bg-accent/10 hover:border-accent/50 
-           cursor-pointer transition-all duration-200;
+  @apply px-4 py-3 text-sm border border-border/10 rounded-lg 
+         text-secondary backdrop-blur-md cursor-pointer 
+         transition-colors duration-150 ease-in-out bg-secondary/10 ;
+}
+}
+
+.search-suggestion:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(101, 100, 105, 0.3),
+    rgba(224, 226, 228, 0.3)
+  );
+  border-color: var(--accent);
+}
+
+@keyframes gradient {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@layer components {
+  .search-btn {
+    @apply bg-primary text-white px-6 py-3 font-medium border-none
+           transition-all duration-300 shadow-sm;
+     animation: pulse-glow 2s infinite ease-in-out;
+     
   }
 
-  @keyframes gradient {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
+  .search-btn:hover {
+    box-shadow: 0 0 10px #e0e2e4, 0 0 20px #e0e2e4;
   }
-
-  .animate-gradient {
-    background-size: 200% 200%;
-    animation: gradient 6s ease infinite;
+}
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 2px #e0e2e4, 0 0 12px #e0e2e4;
   }
+  50% {
+    box-shadow: 0 0 5px #e0e2e4, 0 0 24px #e0e2e4;
+  }
+}
 
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient 6s ease infinite;
+}
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
