@@ -55,26 +55,39 @@ const Hero = () => {
 
   return (
     <section className="min-h-screen relative overflow-hidden">
-      {/* Animated background */}
+     {/* Animated background */}
       <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-background via-card/20 to-background" />
-        <motion.div 
-          className="absolute top-20 -left-20 w-96 h-96 bg-primary/10 rounded-full filter blur-3xl"
-          animate={{ 
-            x: [0, 100, 0],
-            y: [0, -50, 0],
-          }}
-          transition={{ duration: 20, repeat: Infinity }}
-        />
-        <motion.div 
-          className="absolute bottom-20 -right-20 w-96 h-96 bg-accent/10 rounded-full filter blur-3xl"
-          animate={{ 
-            x: [0, -100, 0],
-            y: [0, 50, 0],
-          }}
-          transition={{ duration: 25, repeat: Infinity }}
-        />
+         {/* Background gradient */}
+           <div
+              className="absolute inset-0"
+              style={{
+              background: "#e0e2e4", // your new background color
+              }}
+            />
+
+          {/* Top-left animation blob */}
+           <motion.div
+             className="absolute top-20 -left-20 w-96 h-96 rounded-full filter blur-3xl"
+             style={{ backgroundColor: "rgba(101, 100, 105, 0.55)" }} // #656469 with opacity
+             animate={{
+             x: [0, 100, 0],
+             y: [0, -50, 0],
+             }}
+             transition={{ duration: 20, repeat: Infinity }}
+            />
+
+           {/* Bottom-right animation blob */}
+         <motion.div
+        className="absolute bottom-20 -right-20 w-96 h-96 rounded-full filter blur-3xl"
+        style={{ backgroundColor: "rgba(101, 100, 105, 0.55)" }} // #656469 with opacity
+        animate={{
+        x: [0, -100, 0],
+        y: [0, 50, 0],
+        }}
+        transition={{ duration: 25, repeat: Infinity }}
+         />
       </div>
+
 
       <div className="section-container relative z-10">
         <motion.div
@@ -107,7 +120,7 @@ const Hero = () => {
           </motion.h2>
           
           <motion.p 
-            className="text-xl text-foreground/70 mb-12 max-w-2xl mx-auto"
+            className="text-xl font-semibold text-[#242229]/70 mb-12 max-w-2xl mx-auto"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6 }}
@@ -137,7 +150,7 @@ const Hero = () => {
               <FaSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-foreground/40 text-xl" />
               <button
                 type="submit"
-                className="absolute right-2 top-1/2 -translate-y-1/2 btn-primary"
+                className="absolute right-4 top-1/2 -translate-y-1/2 btn-primary rounded-full search-btn"
               >
                 Search
                 <FaRocket />
@@ -169,7 +182,7 @@ const Hero = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 1 }}
           >
-            <p className="text-sm text-foreground/60 mb-4">Popular searches:</p>
+            <p className="text-md text-secondary mb-4">Popular searches:</p>
             <div className="flex flex-wrap gap-3 justify-center">
               {exampleQueries.map((query, index) => (
                 <motion.button
@@ -204,16 +217,16 @@ const Hero = () => {
                 transition={{ delay: 1.6 + index * 0.1 }}
                 whileHover={{ y: -5 }}
               >
-                <stat.icon className="text-accent text-2xl mx-auto mb-2" />
-                <div className="text-2xl font-bold text-foreground">{stat.value}</div>
-                <div className="text-sm text-foreground/60">{stat.label}</div>
+                <stat.icon className="text-secondary text-2xl mx-auto mb-2" />
+                <div className="text-2xl font-bold text-secondary">{stat.value}</div>
+                <div className="text-sm text-/60">{stat.label}</div>
               </motion.div>
             ))}
           </motion.div>
 
           {/* CTA for data sources */}
           <motion.div
-            className="mt-16 flex items-center justify-center gap-6 text-sm text-foreground/60"
+            className="mt-16 flex items-center justify-center gap-6 text-sm text-accent/60"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 2 }}
