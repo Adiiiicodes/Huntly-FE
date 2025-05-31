@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 
@@ -11,14 +11,18 @@ interface RAGResponse {
   cached: boolean // Whether the response came from cache
 }
 
-// ✅ Proper fetch function with template literals
+// Fixed fetch function to match backend expectations
 const fetchCandidatesHTML = async (query: string): Promise<RAGResponse> => {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/phase1`, {
+  console.log('Fetching with query:', query);
+  
+  // Updated URL path to /api/chat to match the router mounting point
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/chat`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ query })
+    // Updated to use "question" instead of "query" to match backend expectation
+    body: JSON.stringify({ question: query })
   })
 
   if (!response.ok) {
@@ -29,6 +33,21 @@ const fetchCandidatesHTML = async (query: string): Promise<RAGResponse> => {
 }
 
 export default function ResultsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#e0e2e4] px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-accent"></div>
+          <span className="ml-3 text-gray-600">Loading...</span>
+        </div>
+      </div>
+    }>
+      <ResultsContent />
+    </Suspense>
+  )
+}
+
+function ResultsContent() {
   const searchParams = useSearchParams()
   const query = searchParams.get('query')?.toLowerCase() || ''
 
@@ -47,7 +66,14 @@ export default function ResultsPage() {
 
       try {
         setLoading(true)
+        console.log('Starting search for:', query);
+        
         const result = await fetchCandidatesHTML(query)
+        console.log('Search result received:', { 
+          cached: result.cached, 
+          contentLength: result.answer?.length || 0 
+        });
+        
         setHtmlContent(result.answer)
         setCacheInfo(
           result.cached
@@ -72,7 +98,7 @@ export default function ResultsPage() {
       <main className="max-w-6xl mx-auto py-10">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-[#242229]">
-            Results for "{query}"
+            Results for &quot;{query}&quot;
           </h1>
           <Link
             href="/"
