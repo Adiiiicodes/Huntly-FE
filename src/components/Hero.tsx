@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   FaSearch, 
@@ -17,6 +18,7 @@ const Hero = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearchFocused, setIsSearchFocused] = useState(false)
   const [currentExample, setCurrentExample] = useState(0)
+  const router = useRouter()
 
   const exampleQueries = [
     'blockchain expert with RAG experience in Europe',
@@ -33,6 +35,12 @@ const Hero = () => {
     { label: 'Success Rate', value: '94%', icon: FaLightbulb }
   ]
 
+  const filteredSuggestions = searchQuery
+    ? exampleQueries.filter(q =>
+        q.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : []
+
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentExample((prev) => (prev + 1) % exampleQueries.length)
@@ -43,51 +51,32 @@ const Hero = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     if (searchQuery.trim()) {
-      // Handle search navigation
-      console.log('Searching for:', searchQuery)
+      router.push(`/results?query=${encodeURIComponent(searchQuery.trim())}`)
     }
   }
 
   const handleExampleClick = (query: string) => {
-    setSearchQuery(query)
-    setIsSearchFocused(true)
+    router.push(`/results?query=${encodeURIComponent(query)}`)
   }
 
   return (
     <section className="min-h-screen relative overflow-hidden">
-     {/* Animated background */}
+      {/* Animated background */}
       <div className="absolute inset-0">
-         {/* Background gradient */}
-           <div
-              className="absolute inset-0"
-              style={{
-              background: "#e0e2e4", // your new background color
-              }}
-            />
-
-          {/* Top-left animation blob */}
-           <motion.div
-             className="absolute top-20 -left-20 w-96 h-96 rounded-full filter blur-3xl"
-             style={{ backgroundColor: "rgba(101, 100, 105, 0.55)" }} // #656469 with opacity
-             animate={{
-             x: [0, 100, 0],
-             y: [0, -50, 0],
-             }}
-             transition={{ duration: 20, repeat: Infinity }}
-            />
-
-           {/* Bottom-right animation blob */}
-         <motion.div
-        className="absolute bottom-20 -right-20 w-96 h-96 rounded-full filter blur-3xl"
-        style={{ backgroundColor: "rgba(101, 100, 105, 0.55)" }} // #656469 with opacity
-        animate={{
-        x: [0, -100, 0],
-        y: [0, 50, 0],
-        }}
-        transition={{ duration: 25, repeat: Infinity }}
-         />
+        <div className="absolute inset-0" style={{ background: "#e0e2e4" }} />
+        <motion.div
+          className="absolute top-20 -left-20 w-96 h-96 rounded-full filter blur-3xl"
+          style={{ backgroundColor: "rgba(101, 100, 105, 0.55)" }}
+          animate={{ x: [0, 100, 0], y: [0, -50, 0] }}
+          transition={{ duration: 20, repeat: Infinity }}
+        />
+        <motion.div
+          className="absolute bottom-20 -right-20 w-96 h-96 rounded-full filter blur-3xl"
+          style={{ backgroundColor: "rgba(101, 100, 105, 0.55)" }}
+          animate={{ x: [0, -100, 0], y: [0, 50, 0] }}
+          transition={{ duration: 25, repeat: Infinity }}
+        />
       </div>
-
 
       <div className="section-container relative z-10">
         <motion.div
@@ -132,7 +121,7 @@ const Hero = () => {
           {/* Search Bar */}
           <motion.form 
             onSubmit={handleSearch}
-            className="max-w-4xl mx-auto mb-8"
+            className="relative max-w-4xl mx-auto mb-8"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8 }}
@@ -143,7 +132,7 @@ const Hero = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => setIsSearchFocused(true)}
-                onBlur={() => setIsSearchFocused(false)}
+                onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
                 placeholder="Try: blockchain expert with RAG experience in Europe"
                 className="search-input pl-14 pr-32 py-6 text-lg shadow-2xl"
               />
@@ -156,6 +145,21 @@ const Hero = () => {
                 <FaRocket />
               </button>
             </div>
+
+            {/* Dropdown Suggestions */}
+{isSearchFocused && filteredSuggestions.length > 0 && (
+  <ul className="absolute z-10 w-full mt-2 border rounded-md shadow-lg backdrop-blur-sm bg-[#242229]">
+    {filteredSuggestions.map((suggestion, idx) => (
+      <li
+        key={idx}
+        onMouseDown={() => handleExampleClick(suggestion)}
+        className="px-4 py-2 cursor-pointer transition-colors duration-150 rounded-md text-white hover:bg-[#656469]"
+      >
+        {suggestion}
+      </li>
+    ))}
+  </ul>
+)}
 
             {/* Live search indicator */}
             <AnimatePresence>
@@ -224,7 +228,7 @@ const Hero = () => {
             ))}
           </motion.div>
 
-          {/* CTA for data sources */}
+          {/* CTA */}
           <motion.div
             className="mt-16 flex items-center justify-center gap-6 text-sm text-accent/60"
             initial={{ opacity: 0 }}

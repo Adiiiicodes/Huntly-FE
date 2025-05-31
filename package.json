@@ -19,6 +19,7 @@
     "react-dom": "^19.0.0",
     "react-icons": "^5.5.0",
     "react-markdown": "^10.1.0",
+    "sanitize-html": "^2.17.0",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
@@ -27,6 +28,7 @@
     "@types/nodemailer": "^6.4.17",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/sanitize-html": "^2.16.0",
     "autoprefixer": "^10.4.15",
     "eslint": "^9",
     "eslint-config-next": "15.2.1",

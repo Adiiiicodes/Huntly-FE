@@ -13,20 +13,6 @@
   --success: #10b981;
 }
 
-
-@media (prefers-color-scheme: light) {
-  :root {
-    --background: #fafafa;
-    --foreground: #242229;
-    --card: #ffffff;
-    --border: #e0e2e4;
-    --primary: #3a4144;
-    --secondary: #1f2937;
-    --accent: #545458;
-  }
-}
-
-
 * {
   box-sizing: border-box;
   padding: 0;
