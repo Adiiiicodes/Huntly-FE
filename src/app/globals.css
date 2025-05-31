@@ -1,0 +1,116 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #495356;      /* Professional gray */
+  --secondary: #111827;    /* Deep black */
+  --accent: #656469;       /* Medium gray */
+  --background: #0a0a0b;   /* Near black background */
+  --foreground: #e0e2e4;   /* Light gray text */
+  --card: #1a1a1c;         /* Card background */
+  --border: #2a2a2d;       /* Border color */
+  --success: #10b981;      /* Green for success states */
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --background: #fafafa;
+    --foreground: #0a0a0b;
+    --card: #ffffff;
+    --border: #e5e5e7;
+    --primary: #3a4144;
+    --secondary: #1f2937;
+    --accent: #545458;
+  }
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html {
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-roboto), system-ui, -apple-system, sans-serif;
+  letter-spacing: -0.025em;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+@layer components {
+  .section-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24;
+  }
+
+  .search-input {
+    @apply w-full px-6 py-4 bg-background border border-border rounded-xl 
+           text-foreground placeholder-foreground/50 
+           focus:outline-none focus:border-accent focus:ring-2
+  }
+  }
+
+  .btn-primary {
+    @apply bg-primary text-white px-6 py-3 rounded-lg font-medium 
+           hover:bg-primary/90 transform hover:scale-105 
+           transition-all duration-200 inline-flex items-center gap-2
+           shadow-lg hover:shadow-xl;
+  }
+
+  .btn-secondary {
+    @apply bg-card border border-border text-foreground px-6 py-3 
+           rounded-lg font-medium hover:bg-accent/10 hover:border-accent 
+           transition-all duration-200 inline-flex items-center gap-2;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary via-accent to-foreground 
+           bg-clip-text text-transparent animate-gradient;
+  }
+
+  .glass-effect {
+    @apply bg-card/50 backdrop-blur-lg border border-border/50;
+  }
+
+  .search-suggestion {
+    @apply px-4 py-3 text-sm bg-card/50 border border-border/30 
+           rounded-lg hover:bg-accent/10 hover:border-accent/50 
+           cursor-pointer transition-all duration-200;
+  }
+
+  @keyframes gradient {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  .animate-gradient {
+    background-size: 200% 200%;
+    animation: gradient 6s ease infinite;
+  }
+
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}

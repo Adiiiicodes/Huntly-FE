@@ -1,0 +1,444 @@
+/* Optimized Bento Grid Projects Page Styles */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --primary: #3b82f6;    /* Royal Blue */
+  --primary-glow: rgba(59, 130, 246, 0.5);
+  --secondary: #111827;  /* Almost Black */
+  --accent: #10b981;     /* Emerald */
+  --accent-glow: rgba(16, 185, 129, 0.5);
+  --background: #0f172a; /* Dark Slate */
+  --card-bg: rgba(30, 41, 59, 0.5); /* Card background with transparency */
+  --foreground: #f1f5f9; /* Slate Gray 100 */
+  --muted: #94a3b8;      /* Muted text color */
+  --border: rgba(59, 130, 246, 0.2); /* Border with transparency */
+  --card-hover: rgba(59, 130, 246, 0.15); /* Hover state with transparency */
+  --card-shadow: 0 10px 30px -15px rgba(2, 12, 27, 0.7);
+  --hover-shadow: 0 20px 40px -15px rgba(59, 130, 246, 0.4);
+}
+
+/* Light mode overrides */
+@media (prefers-color-scheme: light) {
+  :root {
+    --background: #f8fafc;
+    --card-bg: rgba(255, 255, 255, 0.7);
+    --foreground: #0f172a;
+    --muted: #475569;
+    --border: rgba(59, 130, 246, 0.3);
+    --card-shadow: 0 10px 30px -15px rgba(0, 0, 0, 0.1);
+    --hover-shadow: 0 20px 40px -15px rgba(59, 130, 246, 0.25);
+  }
+}
+
+/* Base styles */
+.projects-page {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  padding: 2rem 0;
+  overflow-x: hidden;
+  background-image: 
+    radial-gradient(circle at 15% 50%, var(--primary-glow) 0%, transparent 25%),
+    radial-gradient(circle at 85% 30%, var(--accent-glow) 0%, transparent 25%);
+  background-attachment: fixed;
+}
+
+.section-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* Project Introduction */
+.projects-introduction {
+  text-align: center;
+  margin-bottom: 4rem;
+  position: relative;
+}
+
+.page-title {
+  font-size: 3.5rem;
+  font-weight: 800;
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.05em;
+  position: relative;
+}
+
+.page-title::after {
+  content: '';
+  position: absolute;
+  bottom: -0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 4px;
+  background: linear-gradient(to right, var(--primary), var(--accent));
+  border-radius: 2px;
+}
+
+.page-description {
+  font-size: 1.25rem;
+  color: var(--muted);
+  max-width: 800px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+/* Gradient text effect */
+.gradient-text {
+  background: linear-gradient(to right, var(--primary), var(--accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  position: relative;
+}
+
+/* Filter buttons */
+.projects-filters {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 4rem;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 10;
+}
+
+.filter-button {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--primary);
+  border: none;
+  padding: 0.75rem 1.75rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.filter-button:hover,
+.filter-button.active {
+  background: var(--primary);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px -5px var(--primary-glow);
+}
+
+/* Bento grid layout */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1.75rem;
+}
+
+/* Card sizes with improved spacing */
+.small-card {
+  grid-column: span 4;
+  min-height: 240px;
+}
+
+.medium-card {
+  grid-column: span 6;
+  min-height: 280px;
+}
+
+.large-card {
+  grid-column: span 8;
+  grid-row: span 2;
+  min-height: 300px;
+}
+
+/* Featured card special styling */
+.featured-card {
+  border-width: 2px;
+  border-color: rgba(59, 130, 246, 0.4);
+  background: linear-gradient(135deg, var(--card-bg), rgba(59, 130, 246, 0.1));
+}
+
+/* Project card styles with enhanced animations */
+.project-card {
+  position: relative;
+  background: var(--card-bg);
+  border-radius: 1.25rem;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(12px);
+  box-shadow: var(--card-shadow);
+  height: 100%;
+  cursor: pointer;
+  /* Removed transform-style: preserve-3d; for better performance */
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+/* Card reveal animation */
+.project-card.reveal {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Enhanced hover effects - simplified */
+.project-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--hover-shadow);
+  border-color: var(--primary);
+  z-index: 10;
+}
+
+/* Glow effect on hover */
+.project-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0;
+  z-index: -1;
+  transition: opacity 0.3s ease;
+  background: radial-gradient(
+    circle at center,
+    var(--primary-glow) 0%,
+    transparent 70%
+  );
+  filter: blur(15px);
+}
+
+.project-card:hover::after {
+  opacity: 0.7;
+}
+
+/* Card content styling */
+.project-info {
+  padding: 1.75rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  z-index: 2;
+}
+
+.project-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.25rem;
+  position: relative;
+}
+
+.project-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--foreground);
+  transition: all 0.3s ease;
+  position: relative;
+  padding-bottom: 0.5rem;
+}
+
+/* Animated underline effect for title */
+.project-title::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(to right, var(--primary), var(--accent));
+  transition: width 0.3s ease;
+}
+
+.project-card:hover .project-title {
+  color: var(--primary);
+}
+
+.project-card:hover .project-title::after {
+  width: 100%;
+}
+
+.project-description {
+  font-size: 0.95rem;
+  color: var(--muted);
+  margin-bottom: 1.75rem;
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: color 0.3s ease;
+}
+
+.project-card:hover .project-description {
+  color: var(--foreground);
+}
+
+.project-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  transition: transform 0.3s ease;
+}
+
+.technology-tag {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--accent);
+  background: rgba(16, 185, 129, 0.1);
+  padding: 0.45rem 0.9rem;
+  border-radius: 9999px;
+  display: inline-block;
+  transition: all 0.3s ease;
+}
+
+.technology-tag:hover {
+  transform: scale(1.05);
+  background: rgba(16, 185, 129, 0.2);
+}
+
+/* GitHub link */
+.github-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 1.25rem;
+  padding: 0.65rem;
+  border-radius: 9999px;
+  transition: all 0.3s ease;
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.github-link:hover {
+  color: white;
+  background: var(--primary);
+  transform: translateY(-3px);
+}
+
+/* Project card background gradient */
+.card-gradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    transparent,
+    rgba(59, 130, 246, 0.05),
+    transparent
+  );
+  transition: opacity 0.3s ease;
+  opacity: 0;
+  z-index: 1;
+}
+
+.project-card:hover .card-gradient {
+  opacity: 1;
+}
+
+/* Parallax background */
+.parallax-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 120%;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.parallax-circle {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.1;
+  filter: blur(30px);
+}
+
+.parallax-circle-1 {
+  top: 10%;
+  left: 10%;
+  width: 300px;
+  height: 300px;
+  background: var(--primary);
+}
+
+.parallax-circle-2 {
+  top: 50%;
+  right: 5%;
+  width: 400px;
+  height: 400px;
+  background: var(--accent);
+}
+
+.parallax-circle-3 {
+  bottom: 10%;
+  left: 20%;
+  width: 250px;
+  height: 250px;
+  background: linear-gradient(45deg, var(--primary), var(--accent));
+}
+
+/* Page transition loading bar */
+.page-transition-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  background: linear-gradient(to right, var(--primary), var(--accent));
+  z-index: 9999;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.loading .page-transition-bar {
+  transform: scaleX(1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .small-card {
+    grid-column: span 6;
+  }
+  
+  .medium-card {
+    grid-column: span 6;
+  }
+  
+  .large-card {
+    grid-column: span 12;
+  }
+  
+  .page-title {
+    font-size: 3rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .bento-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+  
+  .small-card,
+  .medium-card,
+  .large-card {
+    grid-column: span 1;
+  }
+  
+  .page-title {
+    font-size: 2.5rem;
+  }
+  
+  .filter-button {
+    padding: 0.6rem 1.2rem;
+  }
+  
+  .project-info {
+    padding: 1.25rem;
+  }
+}
