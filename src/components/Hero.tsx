@@ -13,7 +13,7 @@ import {
   FaBriefcase,
   FaLightbulb
 } from 'react-icons/fa'
-
+import RegisterButton from './RegisterButton'
 const Hero = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearchFocused, setIsSearchFocused] = useState(false)
@@ -228,19 +228,40 @@ const Hero = () => {
             ))}
           </motion.div>
 
-          {/* CTA */}
-          <motion.div
-            className="mt-16 flex items-center justify-center gap-6 text-sm text-accent/60"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 2 }}
-          >
-            <span>Powered by</span>
-            <FaGithub className="text-xl" />
-            <FaLinkedin className="text-xl" />
-            <FaBriefcase className="text-xl" />
-            <span>and more...</span>
-          </motion.div>
+          
+{/* CTA */}
+<motion.div
+  className="mt-16 flex flex-col items-center justify-center gap-8"
+  initial={{ opacity: 0 }}
+  animate={{ opacity: 1 }}
+  transition={{ delay: 2 }}
+>
+  {/* Catchy Banner */}
+  <motion.div 
+    className="glass-effect rounded-xl px-8 py-4 max-w-xl text-center"
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay: 2.1 }}
+    whileHover={{ scale: 1.03 }}
+  >
+    <h3 className="text-xl font-bold mb-1 gradient-text">List Your Profile Today!</h3>
+    <p className="text-secondary">Showcase your skills and get discovered by top companies worldwide</p>
+  </motion.div>
+
+  {/* Register Button - Centered */}
+  <div className="flex justify-center">
+    <RegisterButton />
+  </div>
+
+  
+  <div className="flex items-center justify-center gap-6 text-sm text-accent/60">
+    <span>Powered by</span>
+    <FaGithub className="text-xl" />
+    <FaLinkedin className="text-xl" />
+    <FaBriefcase className="text-xl" />
+    <span>and more...</span>
+  </div>
+</motion.div>
         </motion.div>
       </div>
     </section>
