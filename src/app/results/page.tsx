@@ -28,8 +28,9 @@ interface RankingResponse {
 const fetchCandidatesHTML = async (query: string): Promise<RAGResponse> => {
   console.log('Fetching with query:', query);
   
-  // Updated URL path to /api/chat to match the router mounting point
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/chat`, {
+  // Updated URL path to /api/chat to match the router mounting 
+  const apiUrl = process.env.API_BASE_URL || 'https://e9b6-182-48-219-59.ngrok-free.app'
+  const response = await fetch(`${apiUrl}/api/chat`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -55,7 +56,9 @@ const fetchRankedAnalysis = async (query: string, initialResponse: string): Prom
     query: query                      // This matches your specification
   })
   
-  const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/ranker?${params}`
+
+  const apiUrl = process.env.API_BASE_URL || 'https://e9b6-182-48-219-59.ngrok-free.app'
+  const url = `${apiUrl}/api/ranker?${params}`
   console.log('Full ranking URL:', url);
   
   const rankingResponse = await fetch(url, {
