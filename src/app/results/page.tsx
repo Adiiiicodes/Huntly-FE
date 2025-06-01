@@ -25,61 +25,58 @@ interface RankingResponse {
 }
 
 // Fixed fetch function to match backend expectations
+// Fixed fetch function to use local API route
 const fetchCandidatesHTML = async (query: string): Promise<RAGResponse> => {
   console.log('Fetching with query:', query);
   
-  // Updated URL path to /api/chat to match the router mounting 
-  const apiUrl = process.env.API_BASE_URL || 'https://e9b6-182-48-219-59.ngrok-free.app'
-  const response = await fetch(`${apiUrl}/api/chat`, {
+  // Use local API route as a proxy
+  const response = await fetch('/api/chat', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    // Updated to use "question" instead of "query" to match backend expectation
     body: JSON.stringify({ question: query })
-  })
+  });
   
   if (!response.ok) {
-    throw new Error(`Failed to fetch candidate HTML: ${response.status}`)
+    throw new Error(`Failed to fetch candidate HTML: ${response.status}`);
   }
-  return response.json()
-}
+  
+  return response.json();
+};
 
-// Updated function to fetch ranked analysis with correct parameters
+// Updated function to use local API route for ranked analysis
 const fetchRankedAnalysis = async (query: string, initialResponse: string): Promise<RankingResponse> => {
   console.log('Fetching ranked analysis for query:', query);
-  console.log('API Base URL:', process.env.NEXT_PUBLIC_API_BASE_URL);
   
-  // Construct URL with query parameters as specified
+  // Construct URL with query parameters
   const params = new URLSearchParams({
-    initialResponse: initialResponse,  // Changed from 'response' to 'initialResponse'
-    query: query                      // This matches your specification
-  })
+    initialResponse: initialResponse,
+    query: query
+  });
   
-
-  const apiUrl = process.env.API_BASE_URL || 'https://e9b6-182-48-219-59.ngrok-free.app'
-  const url = `${apiUrl}/api/ranker?${params}`
+  // Use local API route as a proxy
+  const url = `/api/ranker?${params}`;
   console.log('Full ranking URL:', url);
   
   const rankingResponse = await fetch(url, {
     method: 'GET',
     headers: {
-      'Content-Type': 'application/json'  // Updated to match your header specification
+      'Content-Type': 'application/json'
     }
-  })
+  });
   
   console.log('Ranking response status:', rankingResponse.status);
-  console.log('Ranking response ok:', rankingResponse.ok);
   
   if (!rankingResponse.ok) {
     // Log more details about the error
     const errorText = await rankingResponse.text();
     console.error('Ranking API Error Response:', errorText);
-    throw new Error(`Failed to fetch ranked analysis: ${rankingResponse.status} - ${errorText}`)
+    throw new Error(`Failed to fetch ranked analysis: ${rankingResponse.status} - ${errorText}`);
   }
   
-  return rankingResponse.json()
-}
+  return rankingResponse.json();
+};
 
 export default function ResultsPage() {
   return (
