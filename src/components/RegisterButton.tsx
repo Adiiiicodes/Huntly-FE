@@ -1,5 +1,3 @@
-'use client';
-
 import { useState } from 'react';
 import './RegisterForm.css';
 
@@ -36,7 +34,8 @@ const RegisterButton = () => {
     setSubmitError('');
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/register`, {
+      // Use a direct relative URL to avoid environment variable issues
+      const response = await fetch('/api/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -77,7 +76,7 @@ const RegisterButton = () => {
         onClick={() => setIsOpen(true)} 
         className="btn-primary flex items-center"
       >
-        Register Yourself
+        Register Now
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
@@ -164,7 +163,7 @@ const RegisterButton = () => {
 
               {submitSuccess && (
                 <div className="success-message">
-                  You&apos;r profile is registered successfully!
+                  Registration successful!
                 </div>
               )}
 
