@@ -12,24 +12,24 @@ interface RAGResponse {
 }
 
 // Fixed fetch function to match backend expectations
+// Fixed fetch function to use our local API route
 const fetchCandidatesHTML = async (query: string): Promise<RAGResponse> => {
   console.log('Fetching with query:', query);
   
-  // Updated URL path to /api/chat to match the router mounting point
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/chat`, {
+  // Use the local API route as a proxy to the backend
+  const response = await fetch('/api/chat', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    // Updated to use "question" instead of "query" to match backend expectation
     body: JSON.stringify({ question: query })
-  })
+  });
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch candidate HTML: ${response.status}`)
+    throw new Error(`Failed to fetch candidate HTML: ${response.status}`);
   }
 
-  return response.json()
+  return response.json();
 }
 
 export default function ResultsPage() {
