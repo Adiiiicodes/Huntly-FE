@@ -21,11 +21,11 @@ const Hero = () => {
   const router = useRouter()
 
   const exampleQueries = [
-    'blockchain expert with RAG experience in Europe',
-    'senior React developer with Web3 skills in Berlin',
-    'ML engineer with computer vision background',
-    'full stack developer with DeFi experience',
-    'DevOps engineer with Kubernetes expertise'
+    'Web developer with php, bootstrap, git',
+    'Linux/unix instructor with networking',
+    'Python teaching assistant with docker, postgreSQL',
+    'Full stack developer',
+    'React developer with typescript, product management'
   ]
 
   const stats = [
