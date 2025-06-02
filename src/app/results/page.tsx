@@ -28,7 +28,7 @@ interface RankingResponse {
 // Fixed fetch function to use local API route
 const fetchCandidatesHTML = async (query: string): Promise<RAGResponse> => {
   console.log('Fetching with query:', query);
-  
+
   // Use local API route as a proxy
   const response = await fetch('/api/chat', {
     method: 'POST',
@@ -37,44 +37,44 @@ const fetchCandidatesHTML = async (query: string): Promise<RAGResponse> => {
     },
     body: JSON.stringify({ question: query })
   });
-  
+
   if (!response.ok) {
     throw new Error(`Failed to fetch candidate HTML: ${response.status}`);
   }
-  
+
   return response.json();
 };
 
 // Updated function to use local API route for ranked analysis
 const fetchRankedAnalysis = async (query: string, initialResponse: string): Promise<RankingResponse> => {
   console.log('Fetching ranked analysis for query:', query);
-  
+
   // Construct URL with query parameters
   const params = new URLSearchParams({
     initialResponse: initialResponse,
     query: query
   });
-  
+
   // Use local API route as a proxy
   const url = `/api/ranker?${params}`;
   console.log('Full ranking URL:', url);
-  
+
   const rankingResponse = await fetch(url, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json'
     }
   });
-  
+
   console.log('Ranking response status:', rankingResponse.status);
-  
+
   if (!rankingResponse.ok) {
     // Log more details about the error
     const errorText = await rankingResponse.text();
     console.error('Ranking API Error Response:', errorText);
     throw new Error(`Failed to fetch ranked analysis: ${rankingResponse.status} - ${errorText}`);
   }
-  
+
   return rankingResponse.json();
 };
 
@@ -144,9 +144,9 @@ function ResultsContent() {
         <div class="border-t pt-6">
           <p class="text-lg font-semibold text-gray-800 mb-4">Skills & Expertise</p>
           <div class="flex flex-wrap gap-3">
-            ${candidate.skills.map(skill => 
-              `<span class="bg-gradient-to-r from-[#e0e2e4] to-gray-100 text-[#242229] px-4 py-2 rounded-full text-sm font-medium border border-gray-200 hover:shadow-md transition-shadow">${skill}</span>`
-            ).join('')}
+            ${candidate.skills.map(skill =>
+      `<span class="bg-gradient-to-r from-[#e0e2e4] to-gray-100 text-[#242229] px-4 py-2 rounded-full text-sm font-medium border border-gray-200 hover:shadow-md transition-shadow">${skill}</span>`
+    ).join('')}
           </div>
         </div>
       </div>
@@ -155,23 +155,23 @@ function ResultsContent() {
 
   const renderOriginalContent = (htmlContent: string) => {
     if (!htmlContent) return ''
-    
+
     const candidatePattern = /<h[1-6][^>]*>([^<]+)<\/h[1-6]>|<strong>([^<]+)<\/strong>|<b>([^<]+)<\/b>/gi
     const matches = Array.from(htmlContent.matchAll(candidatePattern))
-    
+
     if (matches.length > 1) {
       const sections = htmlContent.split(/(?=<h[1-6])|(?=<strong>[^<]*(?:candidate|name|profile))/gi)
         .filter(section => {
           const trimmed = section.trim()
           // Filter out short sections and common header fragments
-          return trimmed.length > 50 && 
-                 !trimmed.includes('Here are the') &&
-                 !trimmed.includes('candidates-list') &&
-                 !trimmed.includes('match your query') &&
-                 !trimmed.startsWith('candidate">') &&
-                 trimmed.includes('<') // Must contain actual HTML tags
+          return trimmed.length > 50 &&
+            !trimmed.includes('Here are the') &&
+            !trimmed.includes('candidates-list') &&
+            !trimmed.includes('match your query') &&
+            !trimmed.startsWith('candidate">') &&
+            trimmed.includes('<') // Must contain actual HTML tags
         })
-      
+
       if (sections.length > 1) {
         return sections.map((section, index) => `
           <div class="candidate-card bg-accent/30 p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 mb-6">
@@ -182,7 +182,7 @@ function ResultsContent() {
         `).join('')
       }
     }
-    
+
     return `
       <div class="p-8 rounded-xl shadow-lg">
         <div class="prose max-w-none text-[#242229]">
@@ -190,17 +190,17 @@ function ResultsContent() {
         </div>
       </div>
     `
-}
+  }
 
   const splitCandidatesHTML = (htmlString: string) => {
     if (!htmlString) return []
-    
+
     // Split by common candidate separators or patterns
     // This is a simple approach - you might need to adjust based on your HTML structure
     const candidateBlocks = htmlString.split(/(?=<h[1-6])|(?=<div.*?class.*?candidate)|(?=<article)|(?=<section)/)
       .filter(block => block.trim().length > 0)
 
-      return candidateBlocks.map((block, index) => ({
+    return candidateBlocks.map((block, index) => ({
       id: index,
       html: block.trim()
     }))
@@ -217,13 +217,13 @@ function ResultsContent() {
       try {
         setLoading(true)
         console.log('Starting search for:', query);
-        
+
         const result = await fetchCandidatesHTML(query)
-        console.log('Search result received:', { 
-          cached: result.cached, 
-          contentLength: result.answer?.length || 0 
+        console.log('Search result received:', {
+          cached: result.cached,
+          contentLength: result.answer?.length || 0
         });
-        
+
         setHtmlContent(result.answer)
         setOriginalResponse(result.answer) // Store original response for ranking
         setError(null)
@@ -249,10 +249,10 @@ function ResultsContent() {
       setRankingLoading(true)
       setRankingError(null)
       console.log('Getting ranked analysis...');
-      
+
       const rankingResult = await fetchRankedAnalysis(query, originalResponse)
       console.log('Ranking result received:', rankingResult);
-      
+
       setRankedData(rankingResult)
       setShowRanked(true)
     } catch (err) {
@@ -288,7 +288,7 @@ function ResultsContent() {
                 {error}
               </div>
             )}
-            
+
             {rankingError && (
               <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
                 {rankingError}
@@ -320,7 +320,14 @@ function ResultsContent() {
               >
                 Back to Home
               </Link>
-              
+
+              <Link
+                href={`/dashboard?query=${encodeURIComponent(query)}`}
+                className="text-md font-semibold bg-[#242229] text-[#e0e2e4] px-4 py-3 rounded hover:bg-[#242229]/20 transition text-center"
+              >
+                Analytics Dashboard
+              </Link>
+
               {rankedData && (
                 <button
                   onClick={toggleView}
