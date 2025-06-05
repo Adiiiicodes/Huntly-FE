@@ -3,7 +3,7 @@ import { ApiResponse, Candidate } from './types';
 export async function fetchCandidates(query: string): Promise<Candidate[]> {
   try {
     const response = await fetch(
-      `https://e9b6-182-48-219-59.ngrok-free.app/api/candidates/search?response=/api/chat&query=${encodeURIComponent(query)}`,
+      `http://localhost:6969/api/candidates/search?response=/api/chat&query=${encodeURIComponent(query)}`,
       {
         next: { revalidate: 3600 } // Revalidate data every hour
       }

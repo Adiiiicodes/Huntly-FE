@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FaHome, FaChartBar, FaUsers, FaCog } from 'react-icons/fa';
+import { FaHome, FaChartBar } from 'react-icons/fa';
 
 interface NavItem {
   name: string;
