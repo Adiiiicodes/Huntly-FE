@@ -13,6 +13,7 @@ interface Candidate {
   experience?: string
   experience_years: number
   relevance_score?: number
+  rank?: string
 }
 
 // Define the response type from the RAG service
@@ -371,14 +372,14 @@ function ResultsContent() {
                     <p className="text-center text-gray-600 py-8">No ranked candidates available.</p>
                   ) : (
                     <div className="ranked-results">
-                      {rankedData.data.map((candidate) => (
-                        <CandidateCard 
-                          key={candidate.id} 
-                          candidate={candidate} 
-                          rank={candidate.rank} 
-                        />
-                      ))}
-                    </div>
+  {rankedData.data.map((candidate, index) => (
+    <CandidateCard 
+      key={`${candidate.id}-${index}`} // Add index to ensure unique keys
+      candidate={candidate} 
+      rank={candidate.rank || String(index + 1)} // Add fallback for rank
+    />
+  ))}
+</div>
                   )}
                 </div>
               ) : (

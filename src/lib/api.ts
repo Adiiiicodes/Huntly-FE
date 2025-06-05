@@ -1,11 +1,51 @@
-import { ApiResponse, Candidate } from './types';
+'use client';
 
+import { ApiResponse, Candidate } from '@/lib/types';
+
+// First, fetch the initial response from the chat API
+async function fetchInitialResponse(query: string): Promise<string> {
+  try {
+    // Use absolute URL to avoid path resolution issues
+    const chatResponse = await fetch(`/api/chat`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ question: query })
+    });
+
+    if (!chatResponse.ok) {
+      throw new Error(`Chat API error! status: ${chatResponse.status}`);
+    }
+
+    const data = await chatResponse.json();
+    return data.answer || '';
+  } catch (error) {
+    console.error('Error fetching initial response:', error);
+    throw error;
+  }
+}
+
+// Then use that response to fetch candidates
 export async function fetchCandidates(query: string): Promise<Candidate[]> {
   try {
+    // First get the initial response from the chat API
+    const initialResponse = await fetchInitialResponse(query);
+    
+    // Then use it to fetch candidates using POST
+    // Make sure to use the full URL for external API calls
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:6969';
     const response = await fetch(
-      `http://localhost:6969/api/candidates/search?response=/api/chat&query=${encodeURIComponent(query)}`,
+      `${apiBaseUrl}/api/candidates/search`, 
       {
-        next: { revalidate: 3600 } // Revalidate data every hour
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          query: query,
+          initialResponse: initialResponse
+        })
       }
     );
 
