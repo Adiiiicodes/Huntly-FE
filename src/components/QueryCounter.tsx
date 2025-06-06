@@ -1,67 +1,109 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 
 export default function QueryCounter() {
   const [count, setCount] = useState<number>(500); // Start with a default value
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isConnected, setIsConnected] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   
-  // Get the API base URL from environment variable or use default
-  const API_BASE_URL = process.env._API_BASE_URL || 'https://7a71-114-79-138-174.ngrok-free.app';
+  // Store the EventSource in a ref to prevent it from being recreated on each render
+  const eventSourceRef = useRef<EventSource | null>(null);
+  
+  // Get the API base URL from environment variable with the correct name
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:6969'; // Default to local development
 
   useEffect(() => {
+    console.log('QueryCounter: Initializing with API base URL:', API_BASE_URL);
+    
     // Only attempt to connect if we're in a browser environment
     if (typeof window === 'undefined') return;
     
-    let eventSource: EventSource | null = null;
     let retryCount = 0;
-    const MAX_RETRIES = 2;
+    const MAX_RETRIES = 3;
+    let pollingInterval: NodeJS.Timeout;
 
     const setupSSE = () => {
       try {
         // First, get the initial count via regular fetch
-        fetch(`${API_BASE_URL}/api/counter`)
-          .then(res => res.json())
+        console.log('QueryCounter: Fetching initial count...');
+        setIsLoading(true);
+        
+        fetch(`${API_BASE_URL}/api/counter`, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Cache-Control': 'no-cache'
+          },
+          // Add mode: 'cors' for cross-origin requests
+          mode: 'cors'
+        })
+          .then(res => {
+            if (!res.ok) {
+              throw new Error(`Server returned ${res.status} ${res.statusText}`);
+            }
+            return res.json();
+          })
           .then(data => {
+            console.log('QueryCounter: Initial count received:', data);
             if (data && typeof data.count === 'number') {
               setCount(data.count);
+              setLastUpdated(new Date());
             }
             setIsLoading(false);
           })
           .catch(err => {
-            console.log('Using fallback count - API fetch failed:', err);
+            console.error('QueryCounter: API fetch failed:', err);
             setIsLoading(false);
           });
 
+        // Close any existing connection
+        if (eventSourceRef.current) {
+          console.log('QueryCounter: Closing existing SSE connection');
+          eventSourceRef.current.close();
+        }
+
+        // Clear any existing polling interval
+        if (pollingInterval) {
+          clearInterval(pollingInterval);
+        }
+
         // Then try to set up SSE for real-time updates
-        eventSource = new EventSource(`${API_BASE_URL}/api/counter/stream`);
+        console.log('QueryCounter: Setting up SSE connection...');
+        const sseUrl = `${API_BASE_URL}/api/counter/stream`;
+        console.log('QueryCounter: SSE URL:', sseUrl);
         
-        eventSource.onopen = () => {
-          console.log('SSE connection established');
+        eventSourceRef.current = new EventSource(sseUrl);
+        
+        eventSourceRef.current.onopen = () => {
+          console.log('QueryCounter: SSE connection established');
           setIsConnected(true);
-          retryCount = 500; // Reset retry counter on successful connection
+          retryCount = 0; // Reset retry counter on successful connection
         };
         
-        eventSource.onmessage = (event) => {
+        eventSourceRef.current.onmessage = (event) => {
+          console.log('QueryCounter: SSE message received:', event.data);
           try {
             const data = JSON.parse(event.data);
+            console.log('QueryCounter: Parsed SSE data:', data);
             if (data && typeof data.count === 'number') {
               setCount(data.count);
+              setLastUpdated(new Date());
+              console.log('QueryCounter: Updated count to', data.count);
             }
           } catch (err) {
-            console.log('Error parsing SSE data:', err);
+            console.error('QueryCounter: Error parsing SSE data:', err, 'Raw data:', event.data);
           }
         };
         
-        eventSource.onerror = () => {
-          // Don't log the error object as it might be empty in some browsers
-          console.log('SSE connection error or closed');
+        eventSourceRef.current.onerror = (err) => {
+          console.error('QueryCounter: SSE connection error:', err);
           
-          if (eventSource) {
-            eventSource.close();
-            eventSource = null;
+          if (eventSourceRef.current) {
+            eventSourceRef.current.close();
+            eventSourceRef.current = null;
           }
           
           setIsConnected(false);
@@ -69,18 +111,32 @@ export default function QueryCounter() {
           // Only retry a limited number of times to avoid infinite loops
           if (retryCount < MAX_RETRIES) {
             retryCount++;
-            console.log(`Retry attempt ${retryCount}/${MAX_RETRIES}`);
+            console.log(`QueryCounter: Retry attempt ${retryCount}/${MAX_RETRIES}`);
             
             // Retry after a delay
             setTimeout(() => {
               setupSSE();
             }, 5000);
           } else {
-            console.log('Max retries reached, using static counter');
+            console.log('QueryCounter: Max retries reached, falling back to polling');
+            
+            // Even if SSE fails, periodically poll the API for updates
+            pollingInterval = setInterval(() => {
+              console.log('QueryCounter: Polling for updates...');
+              fetch(`${API_BASE_URL}/api/counter`)
+                .then(res => res.json())
+                .then(data => {
+                  if (data && typeof data.count === 'number') {
+                    setCount(data.count);
+                    setLastUpdated(new Date());
+                  }
+                })
+                .catch(err => console.error('QueryCounter: Polling error:', err));
+            }, 10000); // Poll every 10 seconds as a fallback
           }
         };
       } catch (err) {
-        console.log('Error setting up SSE:', err);
+        console.error('QueryCounter: Error setting up SSE:', err);
         setIsConnected(false);
       }
     };
@@ -90,15 +146,16 @@ export default function QueryCounter() {
     
     // Clean up on unmount
     return () => {
-      if (eventSource) {
-        eventSource.close();
+      console.log('QueryCounter: Cleaning up SSE connection');
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+        eventSourceRef.current = null;
+      }
+      if (pollingInterval) {
+        clearInterval(pollingInterval);
       }
     };
   }, [API_BASE_URL]);
-
-  // Auto-increment the counter every few seconds if not connected to SSE
-  // This provides a good user experience even if the backend is unavailable
-  
 
   return (
     <motion.div 
@@ -109,10 +166,15 @@ export default function QueryCounter() {
         duration: 0.5,
         delay: 0.5 // Match the hero animation delay
       }}
+      title={lastUpdated ? `Last updated: ${lastUpdated.toLocaleTimeString()}` : 'Counter'}
     >
       <div className="relative">
-        <div className="absolute inset-0 bg-accent/30 rounded-full animate-ping opacity-75"></div>
-        <div className="relative w-1.5 h-1.5 bg-accent rounded-full"></div>
+        <div 
+          className={`absolute inset-0 bg-accent/30 rounded-full ${isConnected ? 'animate-ping' : ''} opacity-75`}
+        ></div>
+        <div 
+          className={`relative w-1.5 h-1.5 rounded-full ${isConnected ? 'bg-accent' : 'bg-gray-400'}`}
+        ></div>
       </div>
       
       <span className="text-xs font-medium">
