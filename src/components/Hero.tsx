@@ -14,6 +14,8 @@ import {
   FaLightbulb
 } from 'react-icons/fa'
 import RegisterButton from './RegisterButton'
+import QueryCounter from './QueryCounter' // Import the QueryCounter component
+
 const Hero = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearchFocused, setIsSearchFocused] = useState(false)
@@ -99,15 +101,19 @@ const Hero = () => {
             <h1 className="text-4xl font-bold">Hunt<span className="text-accent">Ly</span></h1>
           </motion.div>
 
-          {/* Tagline */}
-          <motion.h2
-            className="text-5xl md:text-6xl font-bold mb-4"
+          {/* Tagline with QueryCounter */}
+          <motion.div
+            className="flex items-center justify-center gap-3 flex-wrap mb-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
           >
-            Find the <span className="gradient-text">Perfect Talent</span>
-          </motion.h2>
+            <h2 className="text-5xl md:text-6xl font-bold">
+              Find the <span className="gradient-text">Perfect Talent</span>
+            </h2>
+            {/* QueryCounter Component - positioned right next to the heading */}
+            <QueryCounter />
+          </motion.div>
 
           <motion.p
             className="text-xl font-semibold text-[#242229]/70 mb-12 max-w-2xl mx-auto"
