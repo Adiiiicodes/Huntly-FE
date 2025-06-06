@@ -98,15 +98,7 @@ export default function QueryCounter() {
 
   // Auto-increment the counter every few seconds if not connected to SSE
   // This provides a good user experience even if the backend is unavailable
-  useEffect(() => {
-    if (!isConnected) {
-      const interval = setInterval(() => {
-        setCount(prev => prev + Math.floor(Math.random() * 3) + 1); // Increment by 1-3
-      }, 3000);
-      
-      return () => clearInterval(interval);
-    }
-  }, [isConnected]);
+  
 
   return (
     <motion.div 
