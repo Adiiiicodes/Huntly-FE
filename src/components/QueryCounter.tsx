@@ -4,27 +4,69 @@ import { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 
 export default function QueryCounter() {
-  const [count, setCount] = useState<number>(500); // Start with a default value
+  const [count, setCount] = useState<number>(500);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
   
-  // Store the EventSource in a ref to prevent it from being recreated on each render
   const eventSourceRef = useRef<EventSource | null>(null);
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   
-  // Get the API base URL from environment variable with the correct name
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:6969'; // Default to local development
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:6969';
+
+  // Function to poll for updates
+  const pollForUpdates = () => {
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+    }
+    
+    console.log('QueryCounter: Starting polling fallback');
+    
+    // Immediately fetch once
+    fetch(`${API_BASE_URL}/api/counter`)
+      .then(res => res.json())
+      .then(data => {
+        if (data && typeof data.count === 'number') {
+          setCount(data.count);
+          setLastUpdated(new Date());
+        }
+      })
+      .catch(err => console.error('QueryCounter: Polling error:', err));
+    
+    // Then set up interval
+    pollingIntervalRef.current = setInterval(() => {
+      console.log('QueryCounter: Polling for updates...');
+      fetch(`${API_BASE_URL}/api/counter`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && typeof data.count === 'number') {
+            setCount(data.count);
+            setLastUpdated(new Date());
+          }
+        })
+        .catch(err => console.error('QueryCounter: Polling error:', err));
+    }, 5000); // Poll every 5 seconds for mobile
+  };
 
   useEffect(() => {
     console.log('QueryCounter: Initializing with API base URL:', API_BASE_URL);
     
+    // Check if we're on mobile
+    const checkMobile = () => {
+      const userAgent = navigator.userAgent || navigator.vendor;
+      const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|windows phone/i.test(userAgent);
+      setIsMobile(isMobileDevice);
+      return isMobileDevice;
+    };
+    
     // Only attempt to connect if we're in a browser environment
     if (typeof window === 'undefined') return;
     
+    const mobileDevice = checkMobile();
     let retryCount = 0;
-    const MAX_RETRIES = 3;
-    let pollingInterval: NodeJS.Timeout;
-
+    const MAX_RETRIES = mobileDevice ? 1 : 3; // Less retries on mobile
+    
     const setupSSE = () => {
       try {
         // First, get the initial count via regular fetch
@@ -37,7 +79,6 @@ export default function QueryCounter() {
             'Accept': 'application/json',
             'Cache-Control': 'no-cache'
           },
-          // Add mode: 'cors' for cross-origin requests
           mode: 'cors'
         })
           .then(res => {
@@ -53,21 +94,38 @@ export default function QueryCounter() {
               setLastUpdated(new Date());
             }
             setIsLoading(false);
+            
+            // If we're on mobile, maybe skip SSE and go straight to polling
+            if (mobileDevice) {
+              console.log('QueryCounter: Mobile device detected, using polling as primary method');
+              pollForUpdates();
+              return; // Skip SSE setup on mobile devices
+            }
           })
           .catch(err => {
             console.error('QueryCounter: API fetch failed:', err);
             setIsLoading(false);
+            
+            // If initial fetch fails, start polling right away
+            pollForUpdates();
           });
+          
+        // Only proceed with SSE if not on mobile
+        if (mobileDevice) {
+          return;
+        }
 
         // Close any existing connection
         if (eventSourceRef.current) {
           console.log('QueryCounter: Closing existing SSE connection');
           eventSourceRef.current.close();
+          eventSourceRef.current = null;
         }
 
         // Clear any existing polling interval
-        if (pollingInterval) {
-          clearInterval(pollingInterval);
+        if (pollingIntervalRef.current) {
+          clearInterval(pollingIntervalRef.current);
+          pollingIntervalRef.current = null;
         }
 
         // Then try to set up SSE for real-time updates
@@ -77,8 +135,22 @@ export default function QueryCounter() {
         
         eventSourceRef.current = new EventSource(sseUrl);
         
+        // Set a timeout for SSE connection
+        const connectionTimeout = setTimeout(() => {
+          if (!isConnected) {
+            console.log('QueryCounter: SSE connection timeout, falling back to polling');
+            if (eventSourceRef.current) {
+              eventSourceRef.current.close();
+              eventSourceRef.current = null;
+            }
+            setIsConnected(false);
+            pollForUpdates();
+          }
+        }, 5000);
+        
         eventSourceRef.current.onopen = () => {
           console.log('QueryCounter: SSE connection established');
+          clearTimeout(connectionTimeout);
           setIsConnected(true);
           retryCount = 0; // Reset retry counter on successful connection
         };
@@ -100,6 +172,7 @@ export default function QueryCounter() {
         
         eventSourceRef.current.onerror = (err) => {
           console.error('QueryCounter: SSE connection error:', err);
+          clearTimeout(connectionTimeout);
           
           if (eventSourceRef.current) {
             eventSourceRef.current.close();
@@ -119,40 +192,29 @@ export default function QueryCounter() {
             }, 5000);
           } else {
             console.log('QueryCounter: Max retries reached, falling back to polling');
-            
-            // Even if SSE fails, periodically poll the API for updates
-            pollingInterval = setInterval(() => {
-              console.log('QueryCounter: Polling for updates...');
-              fetch(`${API_BASE_URL}/api/counter`)
-                .then(res => res.json())
-                .then(data => {
-                  if (data && typeof data.count === 'number') {
-                    setCount(data.count);
-                    setLastUpdated(new Date());
-                  }
-                })
-                .catch(err => console.error('QueryCounter: Polling error:', err));
-            }, 10000); // Poll every 10 seconds as a fallback
+            pollForUpdates();
           }
         };
       } catch (err) {
         console.error('QueryCounter: Error setting up SSE:', err);
         setIsConnected(false);
+        pollForUpdates();
       }
     };
 
-    // Set up the SSE connection
+    // Set up the connection
     setupSSE();
     
     // Clean up on unmount
     return () => {
-      console.log('QueryCounter: Cleaning up SSE connection');
+      console.log('QueryCounter: Cleaning up connections');
       if (eventSourceRef.current) {
         eventSourceRef.current.close();
         eventSourceRef.current = null;
       }
-      if (pollingInterval) {
-        clearInterval(pollingInterval);
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
       }
     };
   }, [API_BASE_URL]);
