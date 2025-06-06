@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 
 export default function QueryCounter() {
-  const [count, setCount] = useState<number>(54217); // Start with a default value
+  const [count, setCount] = useState<number>(500); // Start with a default value
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isConnected, setIsConnected] = useState<boolean>(true);
   
