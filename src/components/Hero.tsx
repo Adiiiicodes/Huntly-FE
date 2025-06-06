@@ -3,10 +3,10 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  FaSearch, 
-  FaRocket, 
-  FaGithub, 
+import {
+  FaSearch,
+  FaRocket,
+  FaGithub,
   FaLinkedin,
   FaCode,
   FaMapMarkerAlt,
@@ -14,6 +14,8 @@ import {
   FaLightbulb
 } from 'react-icons/fa'
 import RegisterButton from './RegisterButton'
+import QueryCounter from './QueryCounter' // Import the QueryCounter component
+
 const Hero = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearchFocused, setIsSearchFocused] = useState(false)
@@ -37,8 +39,8 @@ const Hero = () => {
 
   const filteredSuggestions = searchQuery
     ? exampleQueries.filter(q =>
-        q.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+      q.toLowerCase().includes(searchQuery.toLowerCase())
+    )
     : []
 
   useEffect(() => {
@@ -61,7 +63,7 @@ const Hero = () => {
 
   return (
     <section className="min-h-screen relative overflow-hidden">
-     {/* Animated background */}
+      {/* Animated background */}
       <div className="absolute inset-0">
         <div className="absolute inset-0" style={{ background: "#e0e2e4" }} />
         <motion.div
@@ -87,7 +89,7 @@ const Hero = () => {
           className="text-center"
         >
           {/* Logo/Brand */}
-          <motion.div 
+          <motion.div
             className="flex items-center justify-center gap-3 mb-8"
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -99,28 +101,32 @@ const Hero = () => {
             <h1 className="text-4xl font-bold">Hunt<span className="text-accent">Ly</span></h1>
           </motion.div>
 
-          {/* Tagline */}
-          <motion.h2 
-            className="text-5xl md:text-6xl font-bold mb-4"
+          {/* Tagline with QueryCounter */}
+          <motion.div
+            className="flex items-center justify-center gap-3 flex-wrap mb-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
           >
-            Find the <span className="gradient-text">Perfect Talent</span>
-          </motion.h2>
-          
-          <motion.p 
+            <h2 className="text-5xl md:text-6xl font-bold">
+              Find the <span className="gradient-text">Perfect Talent</span>
+            </h2>
+            {/* QueryCounter Component - positioned right next to the heading */}
+            <QueryCounter />
+          </motion.div>
+
+          <motion.p
             className="text-xl font-semibold text-[#242229]/70 mb-12 max-w-2xl mx-auto"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6 }}
           >
-            AI-powered search engine to discover professionals by skills, experience, and location. 
+            AI-powered search engine to discover professionals by skills, experience, and location.
             Built for recruiters, founders, and teams.
           </motion.p>
 
           {/* Search Bar */}
-          <motion.form 
+          <motion.form
             onSubmit={handleSearch}
             className="relative max-w-4xl mx-auto mb-8"
             initial={{ opacity: 0, y: 20 }}
@@ -148,19 +154,19 @@ const Hero = () => {
             </div>
 
             {/* Dropdown Suggestions */}
-{isSearchFocused && filteredSuggestions.length > 0 && (
-  <ul className="absolute z-10 w-full mt-2 border rounded-md shadow-lg backdrop-blur-sm bg-[#242229]">
-    {filteredSuggestions.map((suggestion, idx) => (
-      <li
-        key={idx}
-        onMouseDown={() => handleExampleClick(suggestion)}
-        className="px-4 py-2 cursor-pointer transition-colors duration-150 rounded-md text-white hover:bg-[#656469]"
-      >
-        {suggestion}
-      </li>
-    ))}
-  </ul>
-)}
+            {isSearchFocused && filteredSuggestions.length > 0 && (
+              <ul className="absolute z-10 w-full mt-2 border rounded-md shadow-lg backdrop-blur-sm bg-[#242229]">
+                {filteredSuggestions.map((suggestion, idx) => (
+                  <li
+                    key={idx}
+                    onMouseDown={() => handleExampleClick(suggestion)}
+                    className="px-4 py-2 cursor-pointer transition-colors duration-150 rounded-md text-white hover:bg-[#656469]"
+                  >
+                    {suggestion}
+                  </li>
+                ))}
+              </ul>
+            )}
 
             {/* Live search indicator */}
             <AnimatePresence>
@@ -181,7 +187,7 @@ const Hero = () => {
           </motion.form>
 
           {/* Example queries */}
-          <motion.div 
+          <motion.div
             className="max-w-4xl mx-auto mb-16"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -207,7 +213,7 @@ const Hero = () => {
           </motion.div>
 
           {/* Stats */}
-          <motion.div 
+          <motion.div
             className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -229,40 +235,40 @@ const Hero = () => {
             ))}
           </motion.div>
 
-          
-{/* CTA */}
-<motion.div
-  className="mt-16 flex flex-col items-center justify-center gap-8"
-  initial={{ opacity: 0 }}
-  animate={{ opacity: 1 }}
-  transition={{ delay: 2 }}
->
-  {/* Catchy Banner */}
-  <motion.div 
-    className="glass-effect rounded-xl px-8 py-4 max-w-xl text-center"
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ delay: 2.1 }}
-    whileHover={{ scale: 1.03 }}
-  >
-    <h3 className="text-xl font-bold mb-1 gradient-text">List Your Profile Today!</h3>
-    <p className="text-secondary">Showcase your skills and get discovered by top companies worldwide</p>
-  </motion.div>
 
-  {/* Register Button - Centered */}
-  <div className="flex justify-center">
-    <RegisterButton />
-  </div>
+          {/* CTA */}
+          <motion.div
+            className="mt-16 flex flex-col items-center justify-center gap-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 2 }}
+          >
+            {/* Catchy Banner */}
+            <motion.div
+              className="glass-effect rounded-xl px-8 py-4 max-w-xl text-center"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 2.1 }}
+              whileHover={{ scale: 1.03 }}
+            >
+              <h3 className="text-xl font-bold mb-1 gradient-text">List Your Profile Today!</h3>
+              <p className="text-secondary">Showcase your skills and get discovered by top companies worldwide</p>
+            </motion.div>
 
-  
-  <div className="flex items-center justify-center gap-6 text-sm text-accent/60">
-    <span>Powered by</span>
-    <FaGithub className="text-xl" />
-    <FaLinkedin className="text-xl" />
-    <FaBriefcase className="text-xl" />
-    <span>and more...</span>
-  </div>
-</motion.div>
+            {/* Register Button - Centered */}
+            <div className="flex justify-center">
+              <RegisterButton />
+            </div>
+
+
+            <div className="flex items-center justify-center gap-6 text-sm text-accent/60">
+              <span>Powered by</span>
+              <FaGithub className="text-xl" />
+              <FaLinkedin className="text-xl" />
+              <FaBriefcase className="text-xl" />
+              <span>and more...</span>
+            </div>
+          </motion.div>
         </motion.div>
       </div>
     </section>
