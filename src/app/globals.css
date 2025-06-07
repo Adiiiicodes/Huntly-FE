@@ -11,6 +11,7 @@
   --card: #1a1a1c;
   --border: #2a2a2d;
   --success: #10b981;
+  --font-sora: 'Sora', sans-serif;
 }
 
 
@@ -46,11 +47,14 @@ body {
   }
 
   .btn-primary {
-    @apply bg-primary text-white px-6 py-3 rounded-lg font-medium 
-           hover:bg-primary/90 transform hover:scale-105 
-           transition-all duration-200 inline-flex items-center gap-2
-           shadow-lg hover:shadow-xl;
-  }
+  @apply bg-[#5A00FF] text-white px-6 py-3 rounded-xl font-semibold
+         inline-flex items-center gap-2 shadow-md 
+         transition-all duration-300 ease-in-out 
+         hover:bg-[#7B2BFD] hover:shadow-[0_8px_20px_rgba(90,0,255,0.4)]
+         hover:-translate-y-[2px] hover:scale-[1.04];
+}
+
+
 
   .btn-secondary {
     @apply bg-card border border-border text-foreground px-6 py-3 
@@ -59,30 +63,41 @@ body {
   }
 
   .gradient-text {
-  @apply bg-gradient-to-r from-[#242229] via-[#656469] to-[#656469] 
+  @apply bg-gradient-to-r from-[#D92393] via-[#4A8CFF] to-[#111E7D] 
          bg-clip-text text-transparent animate-gradient;
 }
 
+.glass-effect {
+  @apply bg-gradient-to-br from-[#aa3c92]/30 to-[#111E7D]/30 
+         backdrop-blur-xl border border-white/10 
+         transition-all duration-300 ease-in-out transform 
+         animate-tracer-glow;
+}
 
-  .glass-effect {
-    @apply bg-accent/30 backdrop-blur-lg border border-border/20;
-  }
-
-  .search-suggestion {
-  @apply px-4 py-3 text-sm border border-border/10 rounded-lg 
-         text-secondary backdrop-blur-md cursor-pointer 
-         transition-colors duration-150 ease-in-out bg-secondary/10 ;
+ .search-suggestion {
+  @apply px-4 py-3 text-sm rounded-lg cursor-pointer 
+         transition-all duration-200 ease-in-out 
+         backdrop-blur-md 
+         text-white border border-[#aa3c92]/20
+         bg-gradient-to-br from-[#aa3c92]/90 to-[#111E7D]/80 shadow-md;
 }
 }
 
 .search-suggestion:hover {
   background: linear-gradient(
     135deg,
-    rgba(101, 100, 105, 0.3),
-    rgba(224, 226, 228, 0.3)
+    rgba(170, 60, 146, 0.6),
+    rgba(17, 30, 125, 0.6)
   );
-  border-color: var(--accent);
+  border-color: #aa3c92;
+  box-shadow:
+    0 4px 12px rgba(170, 60, 146, 0.3),
+    0 2px 8px rgba(17, 30, 125, 0.2);
+  transform: translateY(-2px);
+  transition: all 200ms ease-in-out;
 }
+
+
 
 @keyframes gradient {
   0%, 100% { background-position: 0% 50%; }
@@ -90,16 +105,21 @@ body {
 }
 
 @layer components {
-  .search-btn {
-    @apply bg-primary text-white px-6 py-3 font-medium border-none
-           transition-all duration-300 shadow-sm;
-     animation: pulse-glow 2s infinite ease-in-out;
-     
-  }
+.search-btn {
+  @apply bg-[#aa3c92] text-white font-semibold rounded-lg 
+         px-4 py-3 pr-3  /* reduce right padding */
+         border-none transition-all duration-300 shadow-md;
+  
+  animation: pulse-glow 2.4s infinite ease-in-out;
+  will-change: transform;
+  transform-origin: center;
+}
 
-  .search-btn:hover {
-    box-shadow: 0 0 10px #e0e2e4, 0 0 20px #e0e2e4;
-  }
+
+.search-btn:hover {
+  box-shadow: 0 0 12px #e0e2e4, 0 0 24px #aa3c92;
+}
+
 }
 @keyframes pulse-glow {
   0%, 100% {

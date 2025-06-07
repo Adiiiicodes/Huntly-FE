@@ -1,12 +1,11 @@
 import type { Metadata } from 'next'
-import { Roboto } from 'next/font/google'
+import { Sora } from 'next/font/google'
 import './globals.css'
 
-const roboto = Roboto({
-  weight: ['300', '400', '500', '700', '900'],
+const sora = Sora({
   subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-roboto',
+  weight: ['400', '600', '700'],
+  variable: '--font-sora', // optional CSS variable name
 })
 
 export const metadata: Metadata = {
@@ -34,10 +33,10 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={roboto.variable}>
-      <body className="antialiased min-h-screen bg-background">
-        {children}
-      </body>
-    </html>
+    <html lang="en" className={sora.variable}>
+  <body className="font-sans antialiased min-h-screen bg-background">
+    {children}
+  </body>
+</html>
   )
 }

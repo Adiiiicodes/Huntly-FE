@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
+import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import {
   FaSearch,
   FaRocket,
@@ -66,13 +67,13 @@ const Hero = () => {
         <div className="absolute inset-0" style={{ background: "#e0e2e4" }} />
         <motion.div
           className="absolute top-20 -left-20 w-96 h-96 rounded-full filter blur-3xl"
-          style={{ backgroundColor: "rgba(101, 100, 105, 0.55)" }}
+          style={{ backgroundColor: "rgba( 170, 60, 146, 0.25)" }}
           animate={{ x: [0, 100, 0], y: [0, -50, 0] }}
           transition={{ duration: 20, repeat: Infinity }}
         />
         <motion.div
           className="absolute bottom-20 -right-20 w-96 h-96 rounded-full filter blur-3xl"
-          style={{ backgroundColor: "rgba(101, 100, 105, 0.55)" }}
+          style={{ backgroundColor: "rgba(17, 30, 125, 0.25)" }}
           animate={{ x: [0, -100, 0], y: [0, 50, 0] }}
           transition={{ duration: 25, repeat: Infinity }}
         />
@@ -87,21 +88,25 @@ const Hero = () => {
           className="text-center"
         >
           {/* Logo/Brand */}
-          <motion.div
-            className="flex items-center justify-center gap-3 mb-8"
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.2 }}
-          >
-            <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center">
-              <FaSearch className="text-white text-xl" />
-            </div>
-            <h1 className="text-4xl font-bold">Hunt<span className="text-accent">Ly</span></h1>
-          </motion.div>
+<motion.div
+  className="flex items-center justify-center gap-4 mb-8 select-none"
+  initial={{ scale: 0.85, opacity: 0 }}
+  animate={{ scale: 1, opacity: 1 }}
+  transition={{ delay: 0.2, type: 'spring', stiffness: 120 }}
+>
+  <div className="w-14 h-14 bg-gradient-to-br from-[#aa3c92] to-[#111E7D] rounded-2xl flex items-center justify-center
+                  shadow-lg hover:shadow-[0_0_20px_4px_rgba(170,60,146,0.7)] transition-shadow duration-500">
+    <FaSearch className="text-white text-2xl" />
+  </div>
+  <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white select-text">
+    Hunt<span className="text-[#aa3c92]">Ly</span>
+  </h1>
+</motion.div>
+
 
           {/* Tagline */}
           <motion.h2
-            className="text-5xl md:text-6xl font-bold mb-4"
+            className="text-5xl text-[#aa3c92] md:text-6xl font-bold mb-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
@@ -110,7 +115,7 @@ const Hero = () => {
           </motion.h2>
 
           <motion.p
-            className="text-xl font-semibold text-[#242229]/70 mb-12 max-w-2xl mx-auto"
+            className="text-xl font-semibold text-[#633158] mb-12 max-w-2xl mx-auto"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6 }}
@@ -140,10 +145,10 @@ const Hero = () => {
               <FaSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-foreground/40 text-xl" />
               <button
                 type="submit"
-                className="absolute right-4 top-1/2 -translate-y-1/2 btn-primary rounded-full search-btn"
+                className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full search-btn inline-flex items-center gap-2"
               >
                 Search
-                <FaRocket />
+                <FaRocket className="text-base"/>
               </button>
             </div>
 
@@ -181,53 +186,55 @@ const Hero = () => {
           </motion.form>
 
           {/* Example queries */}
-          <motion.div
-            className="max-w-4xl mx-auto mb-16"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1 }}
-          >
-            <p className="text-md text-secondary mb-4">Popular searches:</p>
-            <div className="flex flex-wrap gap-3 justify-center">
-              {exampleQueries.map((query, index) => (
-                <motion.button
-                  key={query}
-                  onClick={() => handleExampleClick(query)}
-                  className="search-suggestion"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 1.2 + index * 0.1 }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  {query}
-                </motion.button>
-              ))}
-            </div>
-          </motion.div>
+<motion.div
+  className="max-w-4xl mx-auto mb-16"
+  initial={{ opacity: 0 }}
+  animate={{ opacity: 1 }}
+  transition={{ delay: 1 }}
+>
+  <p className="text-md text-secondary font-semibold mb-4">Popular searches:</p>
+  <div className="flex flex-wrap gap-3 justify-center">
+    {exampleQueries.map((query, index) => (
+      <motion.button
+        key={query}
+        onClick={() => handleExampleClick(query)}
+        className="search-suggestion flex items-center gap-2"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.2 + index * 0.1 }}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+      >
+        <MagnifyingGlassIcon className="w-4 h-4 text-white font-bold" />
+        {query}
+      </motion.button>
+    ))}
+  </div>
+</motion.div>
 
-          {/* Stats */}
-          <motion.div
-            className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.4 }}
-          >
-            {stats.map((stat, index) => (
-              <motion.div
-                key={stat.label}
-                className="glass-effect rounded-xl p-6 text-center"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.6 + index * 0.1 }}
-                whileHover={{ y: -5 }}
-              >
-                <stat.icon className="text-secondary text-2xl mx-auto mb-2" />
-                <div className="text-2xl font-bold text-secondary">{stat.value}</div>
-                <div className="text-sm text-/60">{stat.label}</div>
-              </motion.div>
-            ))}
-          </motion.div>
+
+         {/* Stats */}
+<motion.div
+  className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto"
+  initial={{ opacity: 0 }}
+  animate={{ opacity: 1 }}
+  transition={{ delay: 1.4 }}
+>
+  {stats.map((stat, index) => (
+    <motion.div
+      key={stat.label}
+      className="glass-effect rounded-2xl p-6 text-center"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 1.6 + index * 0.1 }}
+    >
+      <stat.icon className="text-secondary text-3xl mx-auto mb-2" />
+      <div className="text-3xl font-extrabold text-secondary">{stat.value}</div>
+      <div className="text-sm text-secondary">{stat.label}</div>
+    </motion.div>
+  ))}
+</motion.div>
+
 
 
           {/* CTA */}
