@@ -14,44 +14,35 @@ export async function OPTIONS() {
 
 export async function POST(request: NextRequest) {
   try {
-    // Get the backend API URL from environment variable
     const apiUrl = process.env.API_BASE_URL || 'https://f1ad-2405-201-4a-70a0-f578-6ab7-3051-2e18.ngrok-free.app';
-    
-    // Get the question from the request body
     const body = await request.json();
-    
+
     console.log('Proxying chat request to backend:', `${apiUrl}/api/chat`);
     console.log('Request body:', body);
-    
-    // Forward the request to the actual backend
+
     const response = await fetch(`${apiUrl}/api/chat`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(body)
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
     });
-    
-    // If the backend returns an error, log details and throw
+
+    const data = await response.json();
+
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Backend error (${response.status}):`, errorText);
+      console.error(`Backend error (${response.status}):`, data);
       throw new Error(`Backend responded with status: ${response.status}`);
     }
-    
-    // Parse and return the backend response
-    const data = await response.json();
+
+    console.log('Backend response data:', data);
+
     return NextResponse.json(data);
-    
   } catch (error) {
     console.error('Chat API error:', error);
-    
-    // Return a friendly error message
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to process your search request',
         answer: '<p>Sorry, there was an error processing your search request. Please try again later.</p>',
-        cached: false
+        cached: false,
       },
       { status: 500 }
     );
