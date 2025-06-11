@@ -1,11 +1,17 @@
-import Hero from '@/components/Hero'
-
+import Index from '@/pages/Index'
+import Header from '@/components/Header'
+import Footer from '@/components/Footer'
+import TopCandidate from '@/components/TopCandidates'
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-background">
-      <Hero />
-      {/* Future sections: Features, How it Works, Pricing, etc. */}
-    </main>
+    <>
+      <Header />
+      <main>
+        <Index />
+        <TopCandidate />
+      </main>
+      <Footer />
+    </>
   )
 }
