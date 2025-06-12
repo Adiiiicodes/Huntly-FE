@@ -16,6 +16,7 @@ import {
 } from 'react-icons/fa'
 import RegisterButton from './RegisterButton'
 import QueryCounter from './QueryCounter' // Import the QueryCounter component
+import LoginButton from './login/LoginButton'
 
 const Hero = () => {
   const [searchQuery, setSearchQuery] = useState('')
@@ -265,8 +266,8 @@ const Hero = () => {
             {/* Register Button - Centered */}
             <div className="flex justify-center">
               <RegisterButton />
+              <LoginButton />
             </div>
-
 
             <div className="flex items-center justify-center gap-6 text-sm text-accent/60">
               <span>Powered by</span>
