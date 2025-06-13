@@ -58,13 +58,9 @@ export async function POST(request: NextRequest) {
       throw new Error(`Backend error: ${response.status} - ${errorText}`);
     }
     
-    // Get response as text first to inspect
+    // Parse the response as JSON
     const responseText = await response.text();
-    console.log('Raw backend response length:', responseText.length);
-    console.log('Raw backend response preview:', responseText.substring(0, 200));
-    
-    // Parse the response
-    let data;
+    let data: { success: any; data: any[]; };
     try {
       data = JSON.parse(responseText);
       console.log('Parsed response successfully');
