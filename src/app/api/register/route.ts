@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     console.log('Registration request:', data);
 
     // Here you would typically forward this to your actual backend API
-    const apiUrl = process.env.API_BASE_URL || 'https://5bf5-2405-201-4a-70a0-8025-afeb-d6b2-717c.ngrok-free.app';
+    const apiUrl = process.env.API_BASE_URL || 'https://2625-2405-201-4a-70a0-8c11-cd71-fd69-d07.ngrok-free.app';
     const response = await fetch(`${apiUrl}/api/register`, {
       method: 'POST',
       headers: {
