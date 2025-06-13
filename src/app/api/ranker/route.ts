@@ -17,7 +17,7 @@ export async function OPTIONS() {
 export async function POST(request: NextRequest) {
   try {
     // Get the backend API URL from environment variable
-    const apiUrl = process.env.API_BASE_URL || 'https://f5e8-2405-201-4a-70a0-f578-6ab7-3051-2e18.ngrok-free.app';
+    const apiUrl = process.env.API_BASE_URL || 'https://2625-2405-201-4a-70a0-8c11-cd71-fd69-d07.ngrok-free.app';
     
     // Get request body
     const body = await request.json();

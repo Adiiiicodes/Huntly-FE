@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { Sora } from 'next/font/google'
 import './globals.css'
+import { AuthProvider } from '@/contexts/AuthContext'
+import { Toaster } from '@/components/ui/toaster'
 
 const sora = Sora({
   subsets: ['latin'],
@@ -34,9 +36,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={sora.variable}>
-  <body className="font-sans antialiased min-h-screen bg-background">
-    {children}
-  </body>
-</html>
+      <body className="font-sans antialiased min-h-screen bg-background">
+        <AuthProvider>
+          {children}
+          <Toaster />
+        </AuthProvider>
+      </body>
+    </html>
   )
 }
