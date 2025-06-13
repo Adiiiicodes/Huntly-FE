@@ -11,24 +11,19 @@ export async function OPTIONS() {
     }
   });
 }
+
 export async function POST(request: NextRequest) {
   try {
-<<<<<<< Updated upstream
-    // Get the backend API URL from environment variable
-    const apiUrl = process.env.API_BASE_URL || 'https://2625-2405-201-4a-70a0-8c11-cd71-fd69-d07.ngrok-free.app';
-    
-    // Get the question from the request body
-=======
+    // Use ranker backend API URL
     const apiUrl =
       process.env.API_BASE_URL ||
       'https://2625-2405-201-4a-70a0-8c11-cd71-fd69-d07.ngrok-free.app';
->>>>>>> Stashed changes
+
     const body = await request.json();
-    
+
     console.log('Proxying chat request to backend:', `${apiUrl}/api/chat`);
     console.log('Request body:', body);
-    
-    // Forward the request to the actual backend
+
     const response = await fetch(`${apiUrl}/api/chat`, {
       method: 'POST',
       headers: {
@@ -36,18 +31,6 @@ export async function POST(request: NextRequest) {
       },
       body: JSON.stringify(body)
     });
-<<<<<<< Updated upstream
-    
-    // If the backend returns an error, log details and throw
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Backend error (${response.status}):`, errorText);
-      throw new Error(`Backend responded with status: ${response.status}`);
-    }
-    
-    // Parse and return the backend response
-    const data = await response.json();
-=======
 
     const contentType = response.headers.get('content-type');
     const rawText = await response.text();
@@ -62,7 +45,7 @@ export async function POST(request: NextRequest) {
           error: 'Backend did not return JSON',
           answer: '<p>The backend service returned unexpected data.</p>',
           raw: rawText,
-          cached: false,
+          cached: false
         },
         { status: 500 }
       );
@@ -73,31 +56,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error: 'Backend returned an error response',
-          data,
+          data
         },
         { status: response.status }
       );
     }
 
     console.log('Backend response data:', data);
->>>>>>> Stashed changes
     return NextResponse.json(data);
-    
+
   } catch (error) {
     console.error('Chat API error:', error);
-    
-    // Return a friendly error message
+
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to process your search request',
-<<<<<<< Updated upstream
-        answer: '<p>Sorry, there was an error processing your search request. Please try again later.</p>',
-        cached: false
-=======
         answer:
           '<p>Sorry, there was an error processing your search request. Please try again later.</p>',
-        cached: false,
->>>>>>> Stashed changes
+        cached: false
       },
       { status: 500 }
     );
