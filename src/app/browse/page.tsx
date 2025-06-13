@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { allCandidatesService } from "@/services/allCandidateService";
-import { Candidates } from "@/types/candidate";
+import { Candidate } from "@/types/candidate";
 
 const ITEMS_PER_PAGE = 6;
 
@@ -24,10 +24,10 @@ const Browse: React.FC = () => {
   const [skillFilter, setSkillFilter] = useState("all");
   const [availabilityFilter, setAvailabilityFilter] = useState("all");
   const [experienceFilter, setExperienceFilter] = useState("all");
-  const [candidates, setCandidates] = useState<Candidates[]>([]);
+  const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedCandidates, setSelectedCandidates] = useState<Candidates[]>([]);
+  const [selectedCandidates, setSelectedCandidates] = useState<Candidate[]>([]);
   const [showCompare, setShowCompare] = useState(false);
 
   const fetchCandidates = async () => {
@@ -54,7 +54,7 @@ const Browse: React.FC = () => {
     setCurrentPage(1);
   };
 
-  const handleToggleSelect = (candidate: Candidates) => {
+  const handleToggleSelect = (candidate: Candidate) => {
     setSelectedCandidates((prev) => {
       const exists = prev.find((c) => c._id === candidate._id);
       if (exists) {
@@ -65,7 +65,7 @@ const Browse: React.FC = () => {
     });
   };
 
-  const isCandidateSelected = (candidate: Candidates) =>
+  const isCandidateSelected = (candidate: Candidate) =>
     selectedCandidates.some((c) => c._id === candidate._id);
 
   const filteredCandidates = candidates.filter((candidate) => {

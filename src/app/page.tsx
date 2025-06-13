@@ -7,7 +7,7 @@ export default function Home() {
   return (
     <>
       <Header />
-      <main>
+      <main className='bg-white'>
         <Index />
         <TopCandidate />
       </main>
