@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Search,
   Sparkles,
@@ -22,49 +22,86 @@ import CandidateCard from '@/components/CandidateCard';
 import SearchAnalytics from '@/components/SearchAnalytics';
 
 const IndexPage = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <IndexPageContent />
+    </Suspense>
+  );
+};
+
+const IndexPageContent = () => {
   const router = useRouter();
-  const [query, setQuery] = useState('');
-  const [isSearching, setIsSearching] = useState(false);
+  const searchParams = useSearchParams();
+  const [query, setQuery] = useState<string>(searchParams?.get('query') || '');
+  const [isSearching, setIsSearching] = useState<boolean>(false);
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [selectedCandidates, setSelectedCandidates] = useState<string[]>([]);
-  const [showAnalytics, setShowAnalytics] = useState(false); // ADDED STATE
+  const [showAnalytics, setShowAnalytics] = useState<boolean>(false);
 
- const handleSearch = async (query: string) => {
-  setIsSearching(true);
-  const results = await candidateService.searchCandidates(query);
+  // Load search results when page loads or URL changes
+  useEffect(() => {
+    const urlQuery = searchParams?.get('query');
+    if (urlQuery) {
+      setQuery(urlQuery);
+      if (candidates.length === 0 || urlQuery !== query) {
+        performSearch(urlQuery, false);
+      }
+    }
+  }, [searchParams]);
 
-  const fixedResults = results.map((candidate, index) => ({
-    ...candidate,
-    _id: candidate._id || candidate.id || `fallback-${index}`,
-  }));
+  const performSearch = async (searchQuery: string, updateUrl = true) => {
+    if (!searchQuery.trim()) return;
 
-  setCandidates(fixedResults);
-  setIsSearching(false);
-  setShowAnalytics(false);
-};
+    setIsSearching(true);
+    let fixedResults: Candidate[] = [];
+    try {
+      const results = await candidateService.searchCandidates(searchQuery);
 
+      fixedResults = results.map((candidate, index) => ({
+        ...candidate,
+        _id: candidate._id || candidate.id || `fallback-${index}`,
+      }));
 
-const handleAISearch = async () => {
-  if (!query.trim()) return;
-  setIsSearching(true);
-  try {
-    const initialResponse = `These are some candidates based on the query: "${query}"`;
-    const results = await rankService.rankCandidates(query, initialResponse);
+      if (updateUrl) {
+        const params = new URLSearchParams();
+        params.set('query', searchQuery);
+        router.replace(`/?${params.toString()}`, { scroll: false });
+      }
 
-    // Patch _id here too
-    const fixedResults = results.map((candidate, index) => ({
-      ...candidate,
-      _id: candidate._id || candidate.id || `fallback-${index}`,
-    }));
+      setCandidates(fixedResults);
+      setShowAnalytics(false);
+    } catch (error) {
+      console.error('Search error:', error);
+    } finally {
+      setIsSearching(false);
+    }
+  };
 
-    setCandidates(fixedResults);
-    setShowAnalytics(false);
-  } catch (error) {
-    console.error('AI Search error:', error);
-  } finally {
-    setIsSearching(false);
-  }
-};
+  const handleAISearch = async () => {
+    if (!query.trim()) return;
+    setIsSearching(true);
+    let fixedResults: Candidate[] = [];
+    try {
+      const initialResponse = `These are some candidates based on the query: "${query}"`;
+      const results = await rankService.rankCandidates(query, initialResponse);
+
+      fixedResults = results.map((candidate, index) => ({
+        ...candidate,
+        _id: candidate._id || candidate.id || `fallback-${index}`,
+      }));
+
+      const params = new URLSearchParams();
+      params.set('query', query);
+      router.replace(`/?${params.toString()}`, { scroll: false });
+
+      setCandidates(fixedResults);
+      setShowAnalytics(false);
+    } catch (error) {
+      console.error('AI Search error:', error);
+    } finally {
+      setIsSearching(false);
+    }
+  };
 
   const handleAnalyticsSearch = () => {
     setShowAnalytics(true);
@@ -72,9 +109,7 @@ const handleAISearch = async () => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (query.trim()) {
-      handleSearch(query.trim());
-    }
+    performSearch(query.trim());
   };
 
   const toggleSelectCandidate = (id: string) => {
@@ -85,12 +120,10 @@ const handleAISearch = async () => {
 
   const handleCompare = () => {
     const queryParams = new URLSearchParams();
-    selectedCandidates.forEach((id) => queryParams.append("id", id));
-    queryParams.append("query", query);
+    selectedCandidates.forEach((id) => queryParams.append('id', id));
+    queryParams.append('query', query);
     router.push(`/compare?${queryParams.toString()}`);
   };
-
-
 
   const exampleQueries = [
     'Senior Gen-AI engineer, Europe, contract based',
@@ -226,7 +259,7 @@ const handleAISearch = async () => {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Describe your ideal candidate..."
-            className="min-h-[140px] text-lg px-8 py-6 pr-32 border-2 border-gray-200  rounded-2xl resize-none bg-white shadow-lg transition-all duration-300 placeholder:text-black"
+            className="min-h-[140px] text-lg px-8 py-6 pr-32 border-2 border-gray-200 rounded-2xl resize-none bg-white shadow-lg transition-all duration-300 placeholder:text-gray-400 text-black"
             disabled={isSearching}
           />
           <Button
@@ -256,9 +289,8 @@ const handleAISearch = async () => {
           className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
         >
           <Sparkles className="w-4 h-4 mr-2" />
-          AI Powered Search
+          Ranked Search
         </Button>
-        {/* MODIFIED BUTTON DISABLE CONDITION */}
         <Button
           onClick={handleAnalyticsSearch}
           disabled={isSearching || !query.trim() || candidates.length === 0}
@@ -275,21 +307,17 @@ const handleAISearch = async () => {
           {exampleQueries.map((example, index) => (
             <button
               key={index}
-              onClick={() => {
-                setQuery(example);
-                handleSearch(example);
-              }}
+              onClick={() => performSearch(example)}
               className="group px-6 py-3 bg-white border border-gray-200 rounded-full text-sm text-gray-700 hover:bg-black hover:text-white hover:border-black transition-all duration-300 hover:shadow-md hover:-translate-y-0.5"
               disabled={isSearching}
               type="button"
             >
-              <span className="group-hover:font-medium transition-all duration-200">"{example}"</span>
+              <span className="group-hover:font-medium transition-all duration-200">&quot;{example}&quot;</span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* ADDED ANALYTICS SECTION */}
       {showAnalytics && candidates.length > 0 && (
         <SearchAnalytics
           candidates={candidates}
@@ -297,26 +325,28 @@ const handleAISearch = async () => {
         />
       )}
 
-      {/* MODIFIED CANDIDATE CARD SECTION */}
       {!showAnalytics && candidates.length > 0 && (
         <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {candidates.map((candidate, index) => {
-            console.log(`Candidate ${index} _id:`, candidate._id);
-
-            return (
+          {candidates.map((candidate, index) => (
+            <div
+              key={candidate._id || `fallback-${index}`}
+              onClick={() => {
+                router.push(`/candidate/${candidate._id}?query=${encodeURIComponent(query)}`);
+              }}
+              className="cursor-pointer"
+            >
               <CandidateCard
-                key={candidate._id || `fallback-${index}`}
                 candidate={candidate}
                 isSelected={selectedCandidates.includes(candidate._id)}
-                onToggleSelect={() => toggleSelectCandidate(candidate._id)}
+                onToggleSelect={() => {
+                  toggleSelectCandidate(candidate._id);
+                }}
               />
-            );
-          })}
-
+            </div>
+          ))}
         </div>
       )}
 
-      {/* MODIFIED FLOATING BUTTON CONDITION */}
       {!showAnalytics && selectedCandidates.length >= 2 && (
         <div className="fixed bottom-6 right-6 z-50">
           <Button
