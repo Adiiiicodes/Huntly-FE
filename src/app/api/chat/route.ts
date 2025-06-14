@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     // Use ranker backend API URL
     const apiUrl =
       process.env.API_BASE_URL ||
-      'https://956f-2405-201-4a-70a0-8c11-cd71-fd69-d07.ngrok-free.app';
+      'https://b7a5-2405-201-4a-70a0-2c35-2a98-ebcd-8f4d.ngrok-free.app';
 
     const body = await request.json();
 

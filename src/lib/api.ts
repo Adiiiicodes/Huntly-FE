@@ -34,7 +34,7 @@ export async function fetchCandidates(query: string): Promise<Candidate[]> {
     
     // Then use it to fetch candidates using POST
     // Make sure to use the full URL for external API calls
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://956f-2405-201-4a-70a0-8c11-cd71-fd69-d07.ngrok-free.app';
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://b7a5-2405-201-4a-70a0-2c35-2a98-ebcd-8f4d.ngrok-free.app';
     const response = await fetch(
       `${apiBaseUrl}/api/candidates/search`, 
       {
