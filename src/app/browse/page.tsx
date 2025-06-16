@@ -299,12 +299,16 @@ const Filter = ({
   <div className="flex-1 min-w-[200px]">
     <label className="block text-sm font-medium text-gray-700 mb-2">{label}</label>
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger>
+      <SelectTrigger className="bg-black text-white border-gray-700 focus:ring-white">
         <SelectValue placeholder={options[0]?.label || "Select"} />
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent className="bg-black text-white border-gray-700">
         {options.map((opt) => (
-          <SelectItem key={opt.value} value={opt.value}>
+          <SelectItem
+            key={opt.value}
+            value={opt.value}
+            className="hover:bg-gray-800 focus:bg-gray-800 text-white"
+          >
             {opt.label}
           </SelectItem>
         ))}
@@ -312,3 +316,4 @@ const Filter = ({
     </Select>
   </div>
 );
+

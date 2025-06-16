@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect , Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Search,
@@ -32,11 +32,11 @@ const IndexPage = () => {
 const IndexPageContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [query, setQuery] = useState<string>(searchParams?.get('query') || '');
-  const [isSearching, setIsSearching] = useState<boolean>(false);
+  const [query, setQuery] = useState(searchParams?.get('query') || '');
+  const [isSearching, setIsSearching] = useState(false);
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [selectedCandidates, setSelectedCandidates] = useState<string[]>([]);
-  const [showAnalytics, setShowAnalytics] = useState<boolean>(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
 
   // Load search results when page loads or URL changes
   useEffect(() => {
@@ -53,11 +53,10 @@ const IndexPageContent = () => {
     if (!searchQuery.trim()) return;
 
     setIsSearching(true);
-    let fixedResults: Candidate[] = [];
     try {
       const results = await candidateService.searchCandidates(searchQuery);
 
-      fixedResults = results.map((candidate, index) => ({
+      const fixedResults = results.map((candidate, index) => ({
         ...candidate,
         _id: candidate._id || candidate.id || `fallback-${index}`,
       }));
@@ -80,12 +79,11 @@ const IndexPageContent = () => {
   const handleAISearch = async () => {
     if (!query.trim()) return;
     setIsSearching(true);
-    let fixedResults: Candidate[] = [];
     try {
       const initialResponse = `These are some candidates based on the query: "${query}"`;
       const results = await rankService.rankCandidates(query, initialResponse);
 
-      fixedResults = results.map((candidate, index) => ({
+      const fixedResults = results.map((candidate, index) => ({
         ...candidate,
         _id: candidate._id || candidate.id || `fallback-${index}`,
       }));
@@ -338,8 +336,9 @@ const IndexPageContent = () => {
               <CandidateCard
                 candidate={candidate}
                 isSelected={selectedCandidates.includes(candidate._id)}
-                onToggleSelect={() => {
-                  toggleSelectCandidate(candidate._id);
+                onToggleSelect={(id, e) => {
+                  e.stopPropagation();
+                  toggleSelectCandidate(id);
                 }}
               />
             </div>

@@ -16,7 +16,7 @@ const CandidateProfile: React.FC = () => {
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
-  const id = params?.id ? (Array.isArray(params.id) ? params.id[0] : params.id) : '';
+  const id = Array.isArray(params?.id) ? params.id[0] : params?.id || '';
 
   const [candidate, setCandidate] = useState<Candidate | null>(null);
   const [loading, setLoading] = useState(true);
@@ -291,7 +291,7 @@ const CandidateProfile: React.FC = () => {
                 <CardContent className="space-y-4">
                   <Button
                     asChild
-                    className="w-full"
+                    className="w-full bg-black text-white"
                     onClick={() => {
                       const email = candidate.email;
                       if (email) {
