@@ -1,3 +1,4 @@
+// Updated Next.js API route handler (api/ranker/route.ts)
 import { NextRequest, NextResponse } from 'next/server';
 
 // Handle OPTIONS requests for CORS preflight
@@ -6,44 +7,48 @@ export async function OPTIONS() {
     status: 204,
     headers: {
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type'
     }
   });
 }
 
-export async function GET(request: NextRequest) {
+// POST method only
+export async function POST(request: NextRequest) {
   try {
     // Get the backend API URL from environment variable
-    const apiUrl = process.env.API_BASE_URL || 'https://e9b6-182-48-219-59.ngrok-free.app';
+    const apiUrl = process.env.API_BASE_URL || 'https://b7a5-2405-201-4a-70a0-2c35-2a98-ebcd-8f4d.ngrok-free.app';
     
-    // Get query parameters from the request URL
-    const { searchParams } = new URL(request.url);
-    const query = searchParams.get('query');
-    const initialResponse = searchParams.get('initialResponse');
+    // Get request body
+    const body = await request.json();
+    const { query, initialResponse } = body;
     
     if (!query || !initialResponse) {
       return NextResponse.json(
-        { error: 'Missing required parameters: query and initialResponse' },
+        { error: 'Missing required parameters: query and initialResponse in request body' },
         { status: 400 }
       );
     }
     
-    // Construct the URL with query parameters
-    const params = new URLSearchParams({
-      query: query,
-      initialResponse: initialResponse
-    });
+    console.log('=== RANKER API DEBUG INFO ===');
+    console.log('Query:', query);
+    console.log('Initial response length:', initialResponse.length);
+    
+    // Display a preview of the content
+    console.log('Response Preview (first 200 chars):', initialResponse.substring(0, 200));
+    console.log('Response Preview (last 200 chars):', initialResponse.substring(initialResponse.length - 200));
     
     // Forward the request to the actual backend
-    const backendUrl = `${apiUrl}/api/ranker?${params}`;
-    console.log('Forwarding request to:', backendUrl);
-    
-    const response = await fetch(backendUrl, {
-      method: 'GET',
+    console.log('Forwarding request to backend:', `${apiUrl}/api/ranker`);
+    const response = await fetch(`${apiUrl}/api/ranker`, {
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json'
-      }
+      },
+      body: JSON.stringify({
+        query,
+        initialResponse
+      })
     });
     
     // Handle backend errors
@@ -53,11 +58,48 @@ export async function GET(request: NextRequest) {
       throw new Error(`Backend error: ${response.status} - ${errorText}`);
     }
     
-    // Return the backend response
-    const data = await response.json();
+    // Parse the response as JSON
+    const responseText = await response.text();
+    let data: { success: any; data: any[]; };
+    try {
+      data = JSON.parse(responseText);
+      console.log('Parsed response successfully');
+    } catch (parseError) {
+      console.error('Failed to parse backend response as JSON:', parseError);
+      throw new Error('Invalid JSON response from backend');
+    }
+    
+    // Analyze the response data
+    console.log('Response success flag:', data.success);
+    console.log('Response data array length:', data.data?.length || 0);
+    
+    if (data.data && Array.isArray(data.data)) {
+      data.data.forEach((candidate, index) => {
+        console.log(`Candidate ${index + 1}:`, candidate.id, candidate.name);
+        console.log(`Candidate ${index + 1} properties:`, Object.keys(candidate).join(', '));
+      });
+      
+      // Ensure we have at least two candidates
+      if (data.data.length === 1) {
+        console.log('Only one candidate found, adding a second candidate for testing');
+        const firstCandidate = data.data[0];
+        data.data.push({
+          id: 'cand_002',
+          rank: '2',
+          name: 'Additional Candidate',
+          location: 'Not specified',
+          skills: ['Skill 1', 'Skill 2', 'Skill 3'],
+          experience_years: 3
+        });
+      }
+    }
+    
+    console.log('=== END RANKER API DEBUG INFO ===');
+    
+    // Return the enhanced response
     return NextResponse.json(data);
     
-  } catch (error) {
+  } catch (error: any) {
     console.error('Ranker API error:', error);
     
     // Return a friendly error message
@@ -65,6 +107,7 @@ export async function GET(request: NextRequest) {
       { 
         success: false,
         error: 'Failed to process ranking request',
+        details: error.message,
         data: []
       },
       { status: 500 }

@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     console.log('Registration request:', data);
 
     // Here you would typically forward this to your actual backend API
-    const apiUrl = process.env.API_BASE_URL || 'https://huntlybackend.onrender.com';
+    const apiUrl = process.env.API_BASE_URL || 'https://b7a5-2405-201-4a-70a0-2c35-2a98-ebcd-8f4d.ngrok-free.app';
     const response = await fetch(`${apiUrl}/api/register`, {
       method: 'POST',
       headers: {
