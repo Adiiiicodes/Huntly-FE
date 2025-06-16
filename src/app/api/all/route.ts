@@ -14,7 +14,7 @@ export async function OPTIONS() {
 
 export async function GET() {
   try {
-    const apiUrl = process.env.API_BASE_URL || 'https://b7a5-2405-201-4a-70a0-2c35-2a98-ebcd-8f4d.ngrok-free.app';
+    const apiUrl = process.env.API_BASE_URL || 'http://168.231.122.158';
 
     console.log('Proxying GET to:', `${apiUrl}/api/candidates/all`);
 
