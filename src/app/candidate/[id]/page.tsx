@@ -11,6 +11,18 @@ import React, { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { candidateService } from '@/services/candidateService';
 import { allCandidatesService } from '@/services/allCandidateService';
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts';
+
+const requiredSkills = [
+  'JavaScript',
+  'React',
+  'Node.js',
+  'TypeScript',
+  'Python',
+  'Docker',
+  'AWS',
+  'PostgreSQL'
+];
 
 const CandidateProfile: React.FC = () => {
   const router = useRouter();
@@ -22,8 +34,8 @@ const CandidateProfile: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Format experience to show years or months
   const formatExperience = (years: number) => {
+    if (!years) return 'Not specified';
     if (years < 1) {
       const months = Math.round(years * 12);
       return `${months} month${months !== 1 ? 's' : ''}`;
@@ -68,13 +80,22 @@ const CandidateProfile: React.FC = () => {
   }, [id]);
 
   const handleBack = () => {
-    // Check if we have a search query in the URL
     const query = searchParams?.get('query');
     if (query) {
       router.push(`/?query=${encodeURIComponent(query)}`);
     } else {
       router.push('/');
     }
+  };
+
+  const buildSkillGapData = (candidateSkills: string[] = []) => {
+    return requiredSkills.map(skill => ({
+      skill,
+      candidate: candidateSkills.some(s => 
+        s.toLowerCase().includes(skill.toLowerCase())
+      ) ? 100 : 0,
+      required: 100
+    }));
   };
 
   if (loading) {
@@ -98,7 +119,6 @@ const CandidateProfile: React.FC = () => {
                         <Skeleton className="h-8 w-3/4" />
                         <Skeleton className="h-6 w-1/2" />
                         <Skeleton className="h-5 w-2/3" />
-                        <Skeleton className="h-8 w-40" />
                       </div>
                     </div>
                   </CardHeader>
@@ -112,7 +132,6 @@ const CandidateProfile: React.FC = () => {
                     <Skeleton className="h-4 w-full mb-2" />
                     <Skeleton className="h-4 w-5/6 mb-2" />
                     <Skeleton className="h-4 w-4/5 mb-2" />
-                    <Skeleton className="h-4 w-3/4" />
                   </CardContent>
                 </Card>
 
@@ -122,10 +141,19 @@ const CandidateProfile: React.FC = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-wrap gap-2">
-                      {[...Array(6)].map((_, i) => (
+                      {[...Array(8)].map((_, i) => (
                         <Skeleton key={i} className="h-8 w-24" />
                       ))}
                     </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <Skeleton className="h-6 w-1/4" />
+                  </CardHeader>
+                  <CardContent>
+                    <Skeleton className="h-[400px] w-full" />
                   </CardContent>
                 </Card>
               </div>
@@ -231,8 +259,8 @@ const CandidateProfile: React.FC = () => {
           </Button>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <Card className="mb-6">
+            <div className="lg:col-span-2 space-y-6">
+              <Card>
                 <CardHeader>
                   <div className="flex items-start space-x-6">
                     <img
@@ -240,10 +268,10 @@ const CandidateProfile: React.FC = () => {
                       alt={candidate.fullName}
                       className="w-24 h-24 rounded-full object-cover"
                     />
-                    <div className="flex-1">
-                      <h1 className="text-3xl font-bold text-slate-900 mb-2">{candidate.fullName}</h1>
-                      <p className="text-xl text-blue-600 font-medium mb-2">{candidate.jobTitle}</p>
-                      <div className="flex items-center text-slate-600 mb-4">
+                    <div>
+                      <h1 className="text-3xl font-bold text-slate-900">{candidate.fullName}</h1>
+                      <p className="text-xl text-blue-600 font-medium">{candidate.jobTitle}</p>
+                      <div className="flex items-center text-slate-600 mt-2">
                         <MapPin className="w-4 h-4 mr-1" />
                         {candidate.addressWithCountry}
                       </div>
@@ -252,12 +280,12 @@ const CandidateProfile: React.FC = () => {
                 </CardHeader>
               </Card>
 
-              <Card className="mb-6">
+              <Card>
                 <CardHeader>
                   <CardTitle>Professional Summary</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-slate-700 leading-relaxed">
+                  <p className="text-slate-700">
                     {candidate.summary || 'No professional summary provided.'}
                   </p>
                 </CardContent>
@@ -267,17 +295,55 @@ const CandidateProfile: React.FC = () => {
                 <CardHeader>
                   <CardTitle>Skills & Expertise</CardTitle>
                 </CardHeader>
+                <CardContent className="flex flex-wrap gap-2">
+                  {candidate.skills?.length > 0 ? (
+                    candidate.skills.map((skill, i) => (
+                      <Badge key={i} variant="secondary" className="bg-blue-100 text-blue-800">
+                        {skill}
+                      </Badge>
+                    ))
+                  ) : (
+                    <p className="text-slate-500">No skills listed</p>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Skill Gap Analysis</CardTitle>
+                </CardHeader>
                 <CardContent>
-                  <div className="flex flex-wrap gap-2">
-                    {candidate.skills?.length > 0 ? (
-                      candidate.skills.map((skill, index) => (
-                        <Badge key={index} variant="secondary" className="bg-blue-100 text-blue-800">
-                          {skill}
-                        </Badge>
-                      ))
-                    ) : (
-                      <p className="text-slate-500">No skills listed</p>
-                    )}
+                  <div className="h-[400px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <RadarChart cx="50%" cy="50%" outerRadius="80%" data={buildSkillGapData(candidate.skills)}>
+                        <PolarGrid />
+                        <PolarAngleAxis dataKey="skill" />
+                        <PolarRadiusAxis angle={30} domain={[0, 100]} />
+                        <Radar 
+                          name="Candidate" 
+                          dataKey="candidate" 
+                          stroke="#3b82f6" 
+                          fill="#3b82f6" 
+                          fillOpacity={0.6} 
+                        />
+                        <Radar 
+                          name="Required" 
+                          dataKey="required" 
+                          stroke="#94a3b8" 
+                          fill="#94a3b8" 
+                          fillOpacity={0.2} 
+                        />
+                      </RadarChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="mt-4 text-sm text-slate-600">
+                    <p className="mb-2">The radar chart shows how the candidate&apos;s skills match against our required skills:</p>
+                    <ul className="list-disc pl-5 space-y-1">
+                      <li>The <span className="text-blue-500 font-medium">blue area</span> represents the candidate&apos;s skill level</li>
+                      <li>The <span className="text-slate-500 font-medium">gray area</span> shows our required skill level</li>
+                      <li>When the blue area covers the gray completely, it&apos;s a perfect match</li>
+                      <li>Gaps indicate areas where the candidate may need upskilling</li>
+                    </ul>
                   </div>
                 </CardContent>
               </Card>
@@ -340,7 +406,7 @@ const CandidateProfile: React.FC = () => {
                   <div>
                     <span className="font-medium text-slate-600">Experience:</span>
                     <p className="text-slate-900">
-                      {candidate.experienceYears ? formatExperience(candidate.experienceYears) : 'Not specified'}
+                      {formatExperience(candidate.experienceYears)}
                     </p>
                   </div>
                   <div>
