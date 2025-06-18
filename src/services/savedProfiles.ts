@@ -31,7 +31,7 @@ interface SavedProfile {
       console.log(`Attempting to fetch profiles for user ${userId} with token: ${token.substring(0, 15)}...`);
       
       // Try with Authorization Bearer token header (most common approach)
-      const response = await fetch(`http://localhost:6969/api/profiles/save/${userId}`, {
+      const response = await fetch(`http://168.231.122.158/api/profiles/save/${userId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

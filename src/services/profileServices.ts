@@ -18,7 +18,7 @@ interface SavedProfile {
     savedProfiles?: string[];
   }
   
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:6969';
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://168.231.122.158';
   
   /**
    * Fetch all saved profiles for the current user

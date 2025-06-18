@@ -1,6 +1,6 @@
 import { LoginRequest, AuthResponse } from '../types/auth';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:6969';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://168.231.122.158';
 
 export const login = async (data: LoginRequest): Promise<AuthResponse> => {
   try {
