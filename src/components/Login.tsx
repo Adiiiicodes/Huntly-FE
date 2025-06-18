@@ -172,7 +172,7 @@ const LoginWithParams = () => {
             <div className="text-center text-sm text-gray-600 mt-4">
               Don&apos;t have an account?{' '}
               <Link
-                href="/register"
+                href="/signin"
                 className="text-black font-medium hover:underline"
               >
                 Sign up now
