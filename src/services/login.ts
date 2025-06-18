@@ -1,6 +1,6 @@
 import { LoginRequest, AuthResponse } from '../types/auth';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://2625-2405-201-4a-70a0-8c11-cd71-fd69-d07.ngrok-free.app';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://168.231.122.158';
 
 export const login = async (data: LoginRequest): Promise<AuthResponse> => {
   try {

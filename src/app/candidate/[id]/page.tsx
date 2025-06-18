@@ -1,17 +1,23 @@
 'use client';
 
 import { useRouter, useParams } from 'next/navigation';
-import { ArrowLeft, Mail, Phone, MapPin, Calendar, GraduationCap } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, MapPin, Calendar, GraduationCap, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Header from '@/components/Header';
 import { Candidate } from '@/types/candidate';
-import React from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/components/ui/use-toast';
+import { Loader2 } from 'lucide-react';
+import React, { useState } from 'react';
 
 const CandidateProfile: React.FC = () => {
   const router = useRouter();
   const params = useParams();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [isSendingInterview, setIsSendingInterview] = useState(false);
   const id = Array.isArray(params.id) ? params.id[0] : params.id || '1';
 
   // Mock candidate data
@@ -30,6 +36,55 @@ const CandidateProfile: React.FC = () => {
       'https://images.unsplash.com/photo-1494790108755-2616b612b587?w=300&h=300&fit=crop&crop=face',
     salary: '€85-100/hour',
     education: 'PhD Computer Science, Technical University of Berlin',
+  };
+
+  const handleSendInterview = async () => {
+    try {
+      setIsSendingInterview(true);
+      
+      if (!user) {
+        toast({
+          title: "Authentication required",
+          description: "Please sign in to send interview invitations",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const response = await fetch('/api/interviews/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          candidateId: params.id,
+          recruiterId: user.id,
+          candidateEmail: candidate.email,
+          candidateName: candidate.name,
+          companyName: user.companyName || 'Our Company',
+          recruiterName: user.name,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send interview invitation');
+      }
+
+      toast({
+        title: "Interview invitation sent",
+        description: "The candidate will receive an email with the interview link",
+      });
+
+    } catch (error) {
+      console.error('Error sending interview:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send interview invitation. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSendingInterview(false);
+    }
   };
 
   return (
@@ -112,10 +167,25 @@ const CandidateProfile: React.FC = () => {
                   <CardTitle>Contact Information</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <Button className="w-full">
-                    <Mail className="w-4 h-4 mr-2" />
-                    Contact Candidate
-                  </Button>
+                  {user?.role === 'recruiter' && (
+                    <Button 
+                      className="w-full"
+                      onClick={handleSendInterview}
+                      disabled={isSendingInterview}
+                    >
+                      {isSendingInterview ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Sending Interview...
+                        </>
+                      ) : (
+                        <>
+                          <MessageSquare className="w-4 h-4 mr-2" />
+                          Send Interview Link
+                        </>
+                      )}
+                    </Button>
+                  )}
                   <div className="text-sm text-slate-600 space-y-2">
                     <div className="flex items-center">
                       <Phone className="w-4 h-4 mr-2" />

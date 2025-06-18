@@ -52,6 +52,14 @@ const Header: React.FC = () => {
             >
               Browse All
             </Link>
+            <Link
+              href="/search"
+              className={`text-gray-600 hover:text-black transition-colors ${
+                pathname === '/search' ? 'text-black font-medium' : ''
+              }`}
+            >
+              Search
+            </Link>
             {isAuthenticated && (
               <Link
                 href="/dashboard"
@@ -64,7 +72,7 @@ const Header: React.FC = () => {
             )}
           </nav>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center space-x-4">
             <Link href="/register">
               <Button variant="secondary" className="flex items-center space-x-2">
                 <Users className="w-4 h-4" />
