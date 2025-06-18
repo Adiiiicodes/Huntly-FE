@@ -1,3 +1,5 @@
+'use client';
+
 import * as React from "react";
 
 import type { ToastActionElement, ToastProps } from "@/components/ui/toast";
@@ -28,8 +30,6 @@ function genId() {
   return count.toString();
 }
 
-type ActionType = typeof actionTypes[keyof typeof actionTypes];
-
 type Action =
   | {
       type: typeof actionTypes.ADD_TOAST;
@@ -54,8 +54,12 @@ interface State {
 
 const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>();
 
-// This will be set after reducer is defined (circular ref)
-let dispatch: (action: Action) => void;
+const dispatch = (action: Action) => {
+  memoryState = reducer(memoryState, action);
+  listeners.forEach((listener) => {
+    listener(memoryState);
+  });
+};
 
 const addToRemoveQueue = (toastId: string) => {
   if (toastTimeouts.has(toastId)) return;
@@ -128,13 +132,6 @@ export const reducer = (state: State, action: Action): State => {
 const listeners: Array<(state: State) => void> = [];
 
 let memoryState: State = { toasts: [] };
-
-dispatch = (action: Action) => {
-  memoryState = reducer(memoryState, action);
-  listeners.forEach((listener) => {
-    listener(memoryState);
-  });
-};
 
 export type Toast = Omit<ToasterToast, "id">;
 

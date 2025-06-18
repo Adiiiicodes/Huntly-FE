@@ -1,108 +1,163 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Github } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { Mail, Lock } from 'lucide-react';
+import { signup } from '@/services/signup';
+import { SignupRequest } from '@/types/auth';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 
 const SignIn = () => {
-  const handleGoogleSignIn = useCallback(async () => {
-    if (!supabase) {
-      alert('Supabase is not configured. Please set up your Supabase environment variables.');
+  const router = useRouter();
+  const { isAuthenticated, login: authLogin } = useAuth();
+  const { toast } = useToast();
+  const [formData, setFormData] = useState<SignupRequest>({
+    name: '',
+    email: '',
+    password: ''
+  });
+  const [error, setError] = useState('');
+  const [isMounted, setIsMounted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+    if (isAuthenticated) {
+      router.push('/dashboard');
+    }
+  }, [isAuthenticated, router]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    // Clear error when user starts typing
+    if (error) setError('');
+  };
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
+
+    // Basic validation
+    if (!formData.name.trim()) {
+      setError('Name is required');
+      setIsLoading(false);
+      return;
+    }
+    if (!formData.email.trim()) {
+      setError('Email is required');
+      setIsLoading(false);
+      return;
+    }
+    if (!formData.password.trim()) {
+      setError('Password is required');
+      setIsLoading(false);
+      return;
+    }
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      setIsLoading(false);
       return;
     }
 
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/dashboard`,
-        },
-      });
-
-      if (error) {
-        console.error('Error signing in with Google:', error.message);
-        alert('Error signing in with Google. Please try again.');
+      const response = await signup(formData);
+      
+      if (response.token && response.user) {
+        authLogin(response.token, response.user);
+        toast({
+          variant: "success",
+          title: "Sign Up Successful!",
+          description: "Welcome to HunTly! Your account has been created.",
+        });
+        router.push('/dashboard');
+      } else {
+        setError('Signup failed. Please try again.');
       }
-    } catch (error: unknown) {
-      console.error('Google sign-in error:', error);
+    } catch (err) {
+      console.error('Signup error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to create account. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
-  }, []);
+  };
 
-  const handleGithubSignIn = useCallback(async () => {
-    if (!supabase) {
-      alert('Supabase is not configured. Please set up your Supabase environment variables.');
-      return;
-    }
-
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'github',
-        options: {
-          redirectTo: `${window.location.origin}/dashboard`,
-        },
-      });
-
-      if (error) {
-        console.error('Error signing in with GitHub:', error.message);
-        alert('Error signing in with GitHub. Please try again.');
-      }
-    } catch (error: unknown) {
-      console.error('GitHub sign-in error:', error);
-    }
-  }, []);
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">Sign In to HunTly</CardTitle>
-          <CardDescription>Choose your preferred sign-in method</CardDescription>
+          <CardDescription>Create your account</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {!supabase && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3 text-sm text-yellow-800">
-              Supabase is not configured. Please set up your environment variables.
+          <form onSubmit={handleSignup} className="space-y-4">
+            <div className="flex items-center border rounded px-3 py-2 gap-2">
+              <Mail className="w-4 h-4 text-gray-500" />
+              <input
+                type="text"
+                name="name"
+                placeholder="Full Name"
+                value={formData.name}
+                onChange={handleChange}
+                className="w-full outline-none bg-transparent text-sm"
+                required
+                disabled={isLoading || isAuthenticated}
+              />
             </div>
-          )}
 
-          <Button
-            onClick={handleGoogleSignIn}
-            variant="outline"
-            className="w-full flex items-center justify-center space-x-2 h-12 text-white"
-            disabled={!supabase}
-          >
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
-              <path
-                fill="currentColor"
-                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+            <div className="flex items-center border rounded px-3 py-2 gap-2">
+              <Mail className="w-4 h-4 text-gray-500" />
+              <input
+                type="email"
+                name="email"
+                placeholder="Email"
+                value={formData.email}
+                onChange={handleChange}
+                className="w-full outline-none bg-transparent text-sm"
+                required
+                disabled={isLoading || isAuthenticated}
               />
-              <path
-                fill="currentColor"
-                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-              />
-              <path
-                fill="currentColor"
-                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-              />
-              <path
-                fill="currentColor"
-                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-              />
-            </svg>
-            <span>Continue with Google</span>
-          </Button>
+            </div>
 
-          <Button
-            onClick={handleGithubSignIn}
-            variant="outline"
-            className="w-full flex items-center justify-center space-x-2 h-12 text-white"
-            disabled={!supabase}
-          >
-            <Github className="w-5 h-5" />
-            <span>Continue with GitHub</span>
-          </Button>
+            <div className="flex items-center border rounded px-3 py-2 gap-2">
+              <Lock className="w-4 h-4 text-gray-500" />
+              <input
+                type="password"
+                name="password"
+                placeholder="Password"
+                value={formData.password}
+                onChange={handleChange}
+                className="w-full outline-none bg-transparent text-sm"
+                required
+                disabled={isLoading || isAuthenticated}
+              />
+            </div>
+
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-2 rounded text-sm">
+                {error}
+              </div>
+            )}
+
+            <Button 
+              type="submit" 
+              className="w-full h-11 text-bold text-white"
+              disabled={isLoading || isAuthenticated}
+            >
+              {isLoading ? 'Signing up...' : 'Sign Up'}
+            </Button>
+          </form>
 
           <div className="text-center text-sm text-gray-600 mt-6">
             By signing in, you agree to our Terms of Service and Privacy Policy
