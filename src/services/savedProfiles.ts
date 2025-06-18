@@ -46,15 +46,7 @@ export const getSavedProfiles = async (userId: string): Promise<SavedProfile[]> 
         return [];
       }
       
-      let errorMessage = '';
-      try {
-        const errorData = await response.json();
-        errorMessage = errorData.message || JSON.stringify(errorData);
-      } catch {
-        errorMessage = await response.text();
-      }
       
-      throw new Error(`API call failed: ${errorMessage}`);
     }
 
     const data = await response.json();

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { User, Lock } from 'lucide-react';
@@ -10,8 +10,14 @@ import { useToast } from '@/hooks/use-toast';
 import { login } from '@/services/login';
 import Link from 'next/link';
 
-const Login = () => {
+// Separate component that uses useSearchParams
+const LoginWithParams = () => {
   const router = useRouter();
+  const searchParams = new URLSearchParams(
+    typeof window !== 'undefined' ? window.location.search : ''
+  );
+  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
+  
   const { login: authLogin, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const [name, setName] = useState('');
@@ -22,9 +28,10 @@ const Login = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/dashboard');
+      // Redirect to callback URL if provided, otherwise to dashboard
+      router.push(callbackUrl);
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, router, callbackUrl]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,8 +64,8 @@ const Login = () => {
           description: "Welcome back to HunTly!",
         });
         
-        console.log('Redirecting to dashboard...');
-        router.push('/dashboard');
+        console.log(`Redirecting to ${callbackUrl}...`);
+        router.push(callbackUrl);
       } else if (response.message) {
         console.log('Login failed with message:', response.message);
         setError(response.message);
@@ -96,7 +103,7 @@ const Login = () => {
       description: "You are now logged in as a test user.",
     });
     
-    router.push('/dashboard');
+    router.push(callbackUrl);
   };
 
   return (
@@ -104,7 +111,11 @@ const Login = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">Login to HunTly</CardTitle>
-          <CardDescription>Access your personalized dashboard</CardDescription>
+          <CardDescription>
+            {callbackUrl !== '/dashboard' 
+              ? 'Authentication required to access this page' 
+              : 'Access your personalized dashboard'}
+          </CardDescription>
         </CardHeader>
 
         <CardContent>
@@ -115,7 +126,7 @@ const Login = () => {
                 type="text"
                 placeholder="Username"
                 value={name}
-                onChange={e => setName(e.target.value)}
+                onChange={(e) => setName(e.target.value)}
                 className="w-full outline-none bg-transparent text-sm"
                 disabled={isLoading}
               />
@@ -127,7 +138,7 @@ const Login = () => {
                 type="password"
                 placeholder="Password"
                 value={password}
-                onChange={e => setPassword(e.target.value)}
+                onChange={(e) => setPassword(e.target.value)}
                 className="w-full outline-none bg-transparent text-sm"
                 disabled={isLoading}
               />
@@ -161,7 +172,7 @@ const Login = () => {
             <div className="text-center text-sm text-gray-600 mt-4">
               Don&apos;t have an account?{' '}
               <Link
-                href="/signin"
+                href="/register"
                 className="text-black font-medium hover:underline"
               >
                 Sign up now
@@ -182,6 +193,15 @@ const Login = () => {
         </CardContent>
       </Card>
     </div>
+  );
+};
+
+// Main component with Suspense
+const Login = () => {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <LoginWithParams />
+    </Suspense>
   );
 };
 

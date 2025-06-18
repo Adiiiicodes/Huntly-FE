@@ -8,11 +8,14 @@ import { useRouter } from 'next/navigation';
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [user, setUser] = useState<UserData | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showAuthRequired, setShowAuthRequired] = useState(false);
+  const [authRedirectUrl, setAuthRedirectUrl] = useState<string>('');
+  
+  const router = useRouter();
 
   // Load auth state from localStorage on component mount
   useEffect(() => {
@@ -95,33 +98,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       console.log('Auth state cleared');
       
-      // Redirect to login page after logout
+      // Redirect to login page
       router.push('/login');
     } catch (error) {
       console.error('Error during logout:', error);
     }
   };
 
-  // Redirect to login page with return URL
-  const redirectToLogin = (redirectUrl: string = window.location.pathname) => {
-    console.log('Redirecting to login with return URL:', redirectUrl);
-    router.push(`/login?callbackUrl=${encodeURIComponent(redirectUrl)}`);
-  };
-
-  // Check if user is authenticated and redirect if not
-  const checkAuth = (redirectUrl?: string): boolean => {
-    if (!isLoading && !isAuthenticated) {
-      redirectToLogin(redirectUrl);
-      return false;
+  // Handle authentication required
+  const requireAuth = (redirectUrl: string = window.location.pathname) => {
+    if (!isAuthenticated && !isLoading) {
+      console.log('Authentication required for:', redirectUrl);
+      router.push(`/login?callbackUrl=${encodeURIComponent(redirectUrl)}`);
     }
     return isAuthenticated;
   };
 
-  // Get authentication token for API calls
-  const getAuthToken = (): string | null => {
-    return token;
+  // Direct redirect to login page with return URL
+  const redirectToLogin = (redirectUrl: string = window.location.pathname) => {
+    router.push(`/login?callbackUrl=${encodeURIComponent(redirectUrl)}`);
   };
-  
+
+  // Show loading state while checking localStorage
+  if (isLoading) {
+    return <div className="flex items-center justify-center h-screen">Loading authentication...</div>;
+  }
+
   // Provide auth context to children
   return (
     <AuthContext.Provider 
@@ -129,12 +131,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated, 
         user, 
         token, 
-        isLoading,
         login, 
         logout,
+        requireAuth,
         redirectToLogin,
-        checkAuth,
-        getAuthToken 
+        isLoading
       }}
     >
       {children}

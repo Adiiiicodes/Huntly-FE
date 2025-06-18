@@ -2,7 +2,8 @@ import type { Metadata } from 'next'
 import { Roboto } from 'next/font/google'
 import './globals.css'
 import { AuthProvider } from '@/contexts/AuthContext'
-import { Toaster } from '@/components/ui/toaster'
+//import { Toaster } from '@/components/ui/toaster'
+import { Suspense } from 'react'
 
 const roboto = Roboto({
   weight: ['300', '400', '500', '700', '900'],
@@ -38,9 +39,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={roboto.variable}>
       <body className="antialiased min-h-screen bg-background">
-        <AuthProvider>
-          {children}
-          <Toaster />
+      <AuthProvider>
+          <Suspense fallback={<div>Loading...</div>}>
+            {children}
+          </Suspense>
         </AuthProvider>
       </body>
     </html>

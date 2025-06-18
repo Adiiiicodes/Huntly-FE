@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import {
   Search,
   Sparkles,
@@ -20,34 +20,63 @@ import { rankService } from '@/services/rankService';
 import { Candidate } from '@/types/candidate';
 import CandidateCard from '@/components/CandidateCard';
 import SearchAnalytics from '@/components/SearchAnalytics';
-
-const IndexPage = () => {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <IndexPageContent />
-    </Suspense>
-  );
-};
+import { useAuth } from '@/contexts/AuthContext';
 
 const IndexPageContent = () => {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const [query, setQuery] = useState(searchParams?.get('query') || '');
+  const { isAuthenticated, isLoading, checkAuth } = useAuth();
+  
+  // Use URL params without useSearchParams hook
+  const getQueryParam = () => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('query') || '';
+    }
+    return '';
+  };
+  
+  const [query, setQuery] = useState(getQueryParam());
   const [isSearching, setIsSearching] = useState(false);
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [selectedCandidates, setSelectedCandidates] = useState<string[]>([]);
   const [showAnalytics, setShowAnalytics] = useState(false);
 
+  // Authentication check effect
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      checkAuth(window.location.pathname);
+    }
+  }, [isAuthenticated, isLoading, checkAuth]);
+
   // Load search results when page loads or URL changes
   useEffect(() => {
-    const urlQuery = searchParams?.get('query');
+    const urlQuery = getQueryParam();
     if (urlQuery) {
       setQuery(urlQuery);
       if (candidates.length === 0 || urlQuery !== query) {
         performSearch(urlQuery, false);
       }
     }
-  }, [searchParams]);
+  }, [candidates.length, query]);
+
+  // Show loading state during authentication check
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="inline-flex items-center space-x-3 px-6 py-3 bg-white rounded-full shadow-lg">
+          <div className="w-6 h-6 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          <span className="text-lg font-medium text-slate-700">
+            Loading...
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render content if not authenticated (we're redirecting)
+  if (!isAuthenticated) {
+    return null;
+  }
 
   const performSearch = async (searchQuery: string, updateUrl = true) => {
     if (!searchQuery.trim()) return;
@@ -129,7 +158,6 @@ const IndexPageContent = () => {
     'Data scientist with Python and ML experience, US',
     'DevOps engineer, AWS certified, permanent role',
   ];
-
   return (
     <div className="max-w-7xl mx-auto mb-16 px-2 sm:px-4 relative">
       {/* Hero Section */}
@@ -361,6 +389,14 @@ const IndexPageContent = () => {
         </div>
       )}
     </div>
+  );
+};
+
+const IndexPage = () => {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+      <IndexPageContent />
+    </Suspense>
   );
 };
 

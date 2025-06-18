@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -16,12 +16,22 @@ import {
 
 const Header: React.FC = () => {
   const pathname = usePathname();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, logout } = useAuth();
+  
+  // Add client-side rendering state to avoid hydration mismatch
+  const [isClient, setIsClient] = useState(false);
   
   // Debug authentication state
   useEffect(() => {
+    // Set isClient to true when component mounts (client-side only)
+    setIsClient(true);
     console.log("Header auth state:", { isAuthenticated, user });
   }, [isAuthenticated, user]);
+
+  // Handle logout without using hooks inside JSX
+  const handleLogout = () => {
+    if (logout) logout();
+  };
 
   return (
     <header className="bg-white border-b border-gray-200">
@@ -107,7 +117,7 @@ const Header: React.FC = () => {
                   </SheetClose>
                   
                   {/* Show saved candidates link if authenticated */}
-                  {isAuthenticated && (
+                  {isClient && isAuthenticated && (
                     <SheetClose asChild>
                       <Link
                         href="/candidates/saved"
@@ -123,50 +133,54 @@ const Header: React.FC = () => {
                   )}
                 </nav>
                 
-                {/* Mobile Auth Buttons - Only show if not authenticated */}
-                {!isAuthenticated ? (
-                  <div className="mt-8 space-y-4">
-                    <SheetClose asChild>
-                      <Link href="/login" className="block">
-                        <Button variant="default" className="w-full">
-                          Login
-                        </Button>
-                      </Link>
-                    </SheetClose>
-                    <SheetClose asChild>
-                      <Link href="/register" className="block">
-                        <Button
-                          variant="secondary"
-                          className="w-full flex items-center space-x-2"
+                {/* Mobile Auth Buttons - Only render conditionally on client */}
+                {isClient ? (
+                  !isAuthenticated ? (
+                    <div className="mt-8 space-y-4">
+                      <SheetClose asChild>
+                        <Link href="/login" className="block">
+                          <Button variant="default" className="w-full">
+                            Login
+                          </Button>
+                        </Link>
+                      </SheetClose>
+                      <SheetClose asChild>
+                        <Link href="/register" className="block">
+                          <Button
+                            variant="secondary"
+                            className="w-full flex items-center space-x-2"
+                          >
+                            <Users className="w-4 h-4" />
+                            <span>Register</span>
+                          </Button>
+                        </Link>
+                      </SheetClose>
+                    </div>
+                  ) : (
+                    /* Mobile Profile Section */
+                    <div className="mt-8 pt-4 border-t">
+                      <SheetClose asChild>
+                        <Button 
+                          variant="outline" 
+                          className="w-full mt-2" 
+                          onClick={handleLogout}
                         >
-                          <Users className="w-4 h-4" />
-                          <span>Register</span>
+                          Sign Out
                         </Button>
-                      </Link>
-                    </SheetClose>
-                  </div>
+                      </SheetClose>
+                    </div>
+                  )
                 ) : (
-                  /* Mobile Profile Section */
-                  <div className="mt-8 pt-4 border-t">
-                    <SheetClose asChild>
-                      <Button 
-                        variant="outline" 
-                        className="w-full mt-2" 
-                        onClick={() => {
-                          const { logout } = useAuth();
-                          if (logout) logout();
-                        }}
-                      >
-                        Sign Out
-                      </Button>
-                    </SheetClose>
+                  // Loading placeholder during SSR
+                  <div className="mt-8 space-y-4">
+                    <div className="w-full h-10 bg-gray-100 rounded-md animate-pulse"></div>
                   </div>
                 )}
               </SheetContent>
             </Sheet>
           </div>
 
-          {/* Desktop Auth Section */}
+          {/* Desktop Auth Section - Only render conditionally on client */}
           <div className="hidden md:flex items-center space-x-2 lg:space-x-4">
             {/* Debug information */}
             {process.env.NODE_ENV === 'development' && (
@@ -175,28 +189,33 @@ const Header: React.FC = () => {
               </div>
             )}
             
-            {!isAuthenticated ? (
-              <>
-                <Link href="/login">
-                  <Button variant="default" className="text-sm lg:text-base">
-                    Login
-                  </Button>
-                </Link>
-                <Link href="/register">
-                  <Button
-                    variant="secondary"
-                    className="flex items-center space-x-2 text-sm lg:text-base"
-                  >
-                    <Users className="w-4 h-4" />
-                    <span className="hidden sm:inline">Register as Candidate</span>
-                    <span className="sm:hidden">Register</span>
-                  </Button>
-                </Link>
-              </>
+            {isClient ? (
+              !isAuthenticated ? (
+                <>
+                  <Link href="/login">
+                    <Button variant="default" className="text-sm lg:text-base">
+                      Login
+                    </Button>
+                  </Link>
+                  <Link href="/register">
+                    <Button
+                      variant="secondary"
+                      className="flex items-center space-x-2 text-sm lg:text-base"
+                    >
+                      <Users className="w-4 h-4" />
+                      <span className="hidden sm:inline">Register as Candidate</span>
+                      <span className="sm:hidden">Register</span>
+                    </Button>
+                  </Link>
+                </>
+              ) : (
+                <div className="border-l-2 pl-4 border-gray-200">
+                  <UserProfile />
+                </div>
+              )
             ) : (
-              <div className="border-l-2 pl-4 border-gray-200">
-                <UserProfile />
-              </div>
+              // Loading placeholder during SSR
+              <div className="w-32 h-10 bg-gray-100 rounded-md animate-pulse"></div>
             )}
           </div>
         </div>

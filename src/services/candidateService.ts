@@ -1,4 +1,6 @@
 import { Candidate } from '@/types/candidate';
+import { useAuth } from '@/contexts/AuthContext';
+import { fetchWithAuth } from '@/services/fetchWithAuth';
 
 interface RawCandidate {
   _id?: string;
@@ -31,22 +33,17 @@ export const candidateService = {
       
       try {
         console.log('Calling chat API with query:', query);
-        const chatResponse = await fetch('/api/chat', {
+        
+        // Use fetchWithAuth instead of fetch to ensure authentication
+        const chatResponse = await fetchWithAuth('/api/chat', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
           body: JSON.stringify({
             question: query
           })
         });
         
-        if (!chatResponse.ok) {
-          console.error(`Chat API error: ${chatResponse.status}`);
-          throw new Error(`Chat API returned status ${chatResponse.status}`);
-        }
-        
-        const chatData = await chatResponse.json();
+        // fetchWithAuth handles the error cases, so we don't need to check response.ok
+        const chatData = chatResponse;
         console.log('Chat API response received');
         
         if (!chatData || !chatData.answer) {
