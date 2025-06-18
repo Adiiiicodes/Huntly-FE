@@ -1,61 +1,102 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Mail, Lock } from 'lucide-react';
+import { User, Lock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { login } from '@/services/login';
+import Link from 'next/link';
 
 const Login = () => {
   const router = useRouter();
-  const { login: authLogin } = useAuth();
+  const { login: authLogin, isAuthenticated } = useAuth();
   const { toast } = useToast();
-  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push('/dashboard');
+    }
+  }, [isAuthenticated, router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
-    if (!email || !password) {
+    if (!name || !password) {
       setError('Please fill in all fields');
       setIsLoading(false);
       return;
     }
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      console.log('Attempting login with:', { name, password: '*****' });
+      
+      // Use the login service with name instead of email
+      const response = await login({ name, password });
 
-      const data = await response.json();
+      console.log('Login response:', response);
 
-      if (response.ok) {
-        authLogin(data.token, data.user);
+      if (response.token && response.user) {
+        console.log('Login successful, saving auth state...');
+        
+        // Call authLogin with token and user
+        authLogin(response.token, response.user);
+        
         toast({
           variant: "default",
           title: "Login Successful!",
           description: "Welcome back to HunTly!",
         });
+        
+        console.log('Redirecting to dashboard...');
         router.push('/dashboard');
+      } else if (response.message) {
+        console.log('Login failed with message:', response.message);
+        setError(response.message);
       } else {
-        setError(data.message || 'Invalid email or password');
+        console.log('Login failed with unknown response format');
+        setError('Login failed. Please try again.');
       }
     } catch (err) {
       console.error('Login error:', err);
-      setError('An error occurred. Please try again.');
+      setError(err instanceof Error ? err.message : 'An error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // For easier testing in development environment
+  const handleTestLogin = () => {
+    // Create a mock successful response
+    const mockUser = {
+      id: 'test-user-123',
+      name: 'Test User',
+      email: 'test@example.com'
+    };
+    
+    const mockToken = 'test-jwt-token-123';
+    
+    console.log('Setting test user with mock data:', { user: mockUser });
+    
+    // Call the auth context login function directly
+    authLogin(mockToken, mockUser);
+    
+    toast({
+      variant: "default",
+      title: "Test Login Successful!",
+      description: "You are now logged in as a test user.",
+    });
+    
+    router.push('/dashboard');
   };
 
   return (
@@ -69,12 +110,12 @@ const Login = () => {
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="flex items-center border rounded px-3 py-2 gap-2">
-              <Mail className="w-4 h-4 text-gray-500" />
+              <User className="w-4 h-4 text-gray-500" />
               <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
+                type="text"
+                placeholder="Username"
+                value={name}
+                onChange={e => setName(e.target.value)}
                 className="w-full outline-none bg-transparent text-sm"
                 disabled={isLoading}
               />
@@ -92,7 +133,11 @@ const Login = () => {
               />
             </div>
 
-            {error && <p className="text-red-500 text-sm">{error}</p>}
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-2 rounded text-sm">
+                {error}
+              </div>
+            )}
 
             <Button 
               type="submit" 
@@ -102,14 +147,35 @@ const Login = () => {
               {isLoading ? 'Logging in...' : 'Login'}
             </Button>
 
-            <div className="text-center text-sm text-gray-600">
+            {process.env.NODE_ENV !== 'production' && (
+              <Button 
+                type="button"
+                variant="outline"
+                onClick={handleTestLogin}
+                className="w-full mt-2 border-2 border-blue-500 text-blue-500 hover:bg-blue-50"
+              >
+                Test Login (Dev Mode)
+              </Button>
+            )}
+
+            <div className="text-center text-sm text-gray-600 mt-4">
               Don&apos;t have an account?{' '}
+              <Link
+                href="/signin"
+                className="text-black font-medium hover:underline"
+              >
+                Sign up now
+              </Link>
+            </div>
+
+            {/* Optional: Add forgot password link */}
+            <div className="text-center text-xs text-gray-500">
               <button
-                onClick={() => router.push('/signin')}
-                className="text-black hover:underline"
+                onClick={() => router.push('/forgot-password')}
+                className="text-gray-600 hover:underline"
                 type="button"
               >
-                Sign Up
+                Forgot your password?
               </button>
             </div>
           </form>
@@ -119,4 +185,4 @@ const Login = () => {
   );
 };
 
-export default Login; 
+export default Login;
