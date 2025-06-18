@@ -63,7 +63,7 @@ const CandidateResults: React.FC<CandidateResultsProps> = ({
       <div className="mb-8">
         <h3 className="text-2xl font-bold text-slate-900 mb-2">Search Results</h3>
         <p className="text-slate-600">
-          Found {candidates.length} candidates matching "{searchQuery}"
+          Found {candidates.length} candidates matching &quot;{searchQuery}&quot;
         </p>
       </div>
 
@@ -75,7 +75,12 @@ const CandidateResults: React.FC<CandidateResultsProps> = ({
         <h3 className="text-xl font-bold text-slate-900 mb-6">Candidate Profiles</h3>
         <div className="space-y-6">
           {candidates.map((candidate) => (
-            <CandidateCard key={candidate.id} candidate={candidate} />
+            <CandidateCard
+              key={candidate.id}
+              candidate={candidate}
+              isSelected={false}
+              onToggleSelect={() => {}}
+            />
           ))}
         </div>
       </div>

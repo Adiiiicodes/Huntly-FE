@@ -16,29 +16,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const loadAuthState = () => {
       try {
+        // Avoid accessing localStorage during SSR
+        if (typeof window === 'undefined') return;
+        
         const storedToken = localStorage.getItem('token');
         const storedUser = localStorage.getItem('user');
         
-        console.log('Loading auth state from localStorage:', { 
+        console.log('Loading auth state:', { 
           hasToken: !!storedToken, 
           hasUser: !!storedUser 
         });
         
         if (storedToken && storedUser) {
-          const parsedUser = JSON.parse(storedUser);
-          setToken(storedToken);
-          setUser(parsedUser);
-          setIsAuthenticated(true);
-          
-          console.log('Auth state restored successfully');
-        } else {
-          console.log('No stored auth state found');
+          try {
+            const parsedUser = JSON.parse(storedUser);
+            setToken(storedToken);
+            setUser(parsedUser);
+            setIsAuthenticated(true);
+            
+            console.log('Auth state restored from localStorage:', { isAuthenticated: true, user: parsedUser });
+          } catch (error) {
+            console.error('Error parsing stored user data:', error);
+            // Clear potentially corrupted storage
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+          }
         }
       } catch (error) {
         console.error('Error loading auth state:', error);
-        // Clear potentially corrupted storage
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
       } finally {
         setIsLoading(false);
       }
@@ -94,7 +99,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Show loading state while checking localStorage
   if (isLoading) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+    return <div className="flex items-center justify-center h-screen">Loading authentication...</div>;
   }
 
   // Provide auth context to children
