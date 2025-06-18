@@ -4,35 +4,29 @@ export interface SignupRequest {
   password: string;
 }
 
-export interface SignupResponse {
-  token: string;
-  user: {
-    id: string;
-    name: string;
-    email: string;
-  };
-}
-
 export interface LoginRequest {
-  email: string;
+  name: string;  // Changed from email to name for login
   password: string;
 }
 
-export interface LoginResponse {
-  token: string;
-  user: {
-    id: string;
-    name: string;
-    email: string;
-  };
+export interface UserData {
+  id: string;
+  name: string;
+  email: string;
+  savedProfiles?: string[];
 }
 
 export interface AuthResponse {
+  success?: boolean;
   token?: string;
-  user?: {
-    id: string;
-    name: string;
-    email: string;
-  };
+  user?: UserData;
   message?: string;
-} 
+}
+
+export interface AuthContextType {
+  isAuthenticated: boolean;
+  user: UserData | null;
+  token: string | null;
+  login: (token: string, user: UserData) => void;
+  logout: () => void;
+}

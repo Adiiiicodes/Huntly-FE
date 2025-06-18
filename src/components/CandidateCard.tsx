@@ -1,14 +1,15 @@
+// CandidateCard.tsx
 import React from 'react';
 import Link from 'next/link';
-import { Candidates } from '../types/candidate';
+import { Candidate } from '../types/candidate';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
 interface CandidateCardProps {
-  candidate: Candidates;
+  candidate: Candidate;
   isSelected: boolean;
-  onToggleSelect: (candidate: Candidates) => void;
+  onToggleSelect: (candidateId: string, e: React.MouseEvent) => void; // Added event parameter
 }
 
 const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, isSelected, onToggleSelect }) => {
@@ -27,6 +28,11 @@ const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, isSelected, on
     return exp || 'N/A';
   };
 
+  const handleCheckboxClick = (e: React.MouseEvent<HTMLInputElement>) => {
+    e.stopPropagation();
+    onToggleSelect(candidate._id, e);
+  };
+
   return (
     <Card
       className={`p-6 hover:shadow-lg transition-all duration-300 border-l-4 ${
@@ -38,7 +44,8 @@ const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, isSelected, on
           <input
             type="checkbox"
             checked={isSelected}
-            onChange={() => onToggleSelect(candidate)}
+            onChange={() => {}} // Empty onChange to satisfy React
+            onClick={handleCheckboxClick}
             className="mt-2"
           />
           <img
@@ -55,10 +62,10 @@ const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, isSelected, on
           />
           <div>
             <h4 className="text-xl font-bold text-slate-900 mb-1">
-              {candidate.fullName || 'N/A'}
+              {candidate.fullName}
             </h4>
             <p className="text-lg text-blue-600 font-medium mb-1">
-              {candidate.jobTitle || 'No title'}
+              {candidate.jobTitle}
             </p>
             <p className="text-slate-600">{candidate.addressWithCountry || 'N/A'}</p>
           </div>
@@ -121,23 +128,18 @@ const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, isSelected, on
       </div>
 
       <div className="flex space-x-3">
-        <Link href={`/candidate/${candidate._id}`} passHref>
-          <Button variant="outline" className="w-full flex-1 text-white">
+        <Button variant="outline" className="w-full flex-1 text-white" asChild>
+          <Link href={`/candidate/${candidate._id}`}>
             View Full Profile
-          </Button>
-        </Link>
+          </Link>
+        </Button>
 
         {candidate.linkedinUrl ? (
-          <a
-            href={candidate.linkedinUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full flex-1"
-          >
-            <Button className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+          <Button asChild className="w-full flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+            <a href={candidate.linkedinUrl} target="_blank" rel="noopener noreferrer">
               LinkedIn
-            </Button>
-          </a>
+            </a>
+          </Button>
         ) : (
           <Button disabled className="flex-1">
             No LinkedIn

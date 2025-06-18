@@ -1,7 +1,7 @@
-import { Candidates } from '@/types/candidate';
+import { Candidate } from '@/types/candidate';
 
 export const allCandidatesService = {
-  getAllCandidates: async (): Promise<Candidates[]> => {
+  getAllCandidates: async (): Promise<Candidate[]> => {
     try {
       const res = await fetch(`/api/all`, {
         method: 'GET',
@@ -28,13 +28,16 @@ export const allCandidatesService = {
         return [];
       }
 
-      return candidatesArray.map(candidate => ({
-        _id: candidate.id || candidate._id || '',
+      return candidatesArray.map((candidate) => ({
+        id: candidate.id || candidate._id || '',
+        _id: candidate._id || candidate.id || '',
         fullName: candidate.fullName || '',
         jobTitle: candidate.jobTitle || 'N/A',
         addressWithCountry: candidate.addressWithCountry || 'Unknown',
-        experienceYears: candidate.experienceYears ?? 'N/A', // <= fix here
-        skills: candidate.skills || [],
+        experienceYears: typeof candidate.experienceYears === 'number'
+          ? candidate.experienceYears
+          : parseFloat(candidate.experienceYears) || 0, // Ensures it's always a number
+        skills: Array.isArray(candidate.skills) ? candidate.skills : [],
         availability: candidate.availability || 'Not specified',
         summary: candidate.mobileNumber || '',
         avatar: `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(candidate.fullName || 'user')}`,
@@ -42,7 +45,9 @@ export const allCandidatesService = {
         education: candidate.education || 'N/A',
         linkedinUrl: candidate.linkedinUrl || '',
         email: candidate.email || 'N/A',
+        matchScore: typeof candidate.matchScore === 'number' ? candidate.matchScore : 0, // ADDED
       }));
+
     } catch (error) {
       console.error('Error fetching candidates:', error);
       return [];

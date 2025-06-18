@@ -14,10 +14,11 @@ export async function OPTIONS() {
 
 export async function POST(request: NextRequest) {
   try {
-    // Get the backend API URL from environment variable
-    const apiUrl = process.env.API_BASE_URL || 'https://2625-2405-201-4a-70a0-8c11-cd71-fd69-d07.ngrok-free.app';
-    
-    // Get the question from the request body
+    // Use ranker backend API URL
+    const apiUrl =
+      process.env.API_BASE_URL ||
+      'http://168.231.122.158';
+
     const body = await request.json();
 
     console.log('Proxying chat request to backend:', `${apiUrl}/api/chat`);
@@ -25,27 +26,54 @@ export async function POST(request: NextRequest) {
 
     const response = await fetch(`${apiUrl}/api/chat`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
     });
 
-    const data = await response.json();
+    const contentType = response.headers.get('content-type');
+    const rawText = await response.text();
+
+    let data;
+    if (contentType?.includes('application/json')) {
+      data = JSON.parse(rawText);
+    } else {
+      console.error('Expected JSON but got:', rawText);
+      return NextResponse.json(
+        {
+          error: 'Backend did not return JSON',
+          answer: '<p>The backend service returned unexpected data.</p>',
+          raw: rawText,
+          cached: false
+        },
+        { status: 500 }
+      );
+    }
 
     if (!response.ok) {
       console.error(`Backend error (${response.status}):`, data);
-      throw new Error(`Backend responded with status: ${response.status}`);
+      return NextResponse.json(
+        {
+          error: 'Backend returned an error response',
+          data
+        },
+        { status: response.status }
+      );
     }
 
     console.log('Backend response data:', data);
-
     return NextResponse.json(data);
+
   } catch (error) {
     console.error('Chat API error:', error);
+
     return NextResponse.json(
       {
         error: 'Failed to process your search request',
-        answer: '<p>Sorry, there was an error processing your search request. Please try again later.</p>',
-        cached: false,
+        answer:
+          '<p>Sorry, there was an error processing your search request. Please try again later.</p>',
+        cached: false
       },
       { status: 500 }
     );

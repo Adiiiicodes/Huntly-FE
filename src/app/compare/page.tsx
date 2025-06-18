@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import CompareClient from './CompareClient'; // ✅ regular import
+import CompareClient from './compareClient'; // 
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ComparePage() {

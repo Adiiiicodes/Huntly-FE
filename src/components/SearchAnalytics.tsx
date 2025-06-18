@@ -52,20 +52,21 @@ const SearchAnalytics: React.FC<SearchAnalyticsProps> = ({ candidates, onClose }
     .slice(0, 6)
     .map(([skill, count]) => ({ skill, count }));
 
-  // === Dynamic Experience Buckets ===
-  const experienceData: Record<string, number> = {};
-  candidates.forEach((c) => {
-    const years = parseInt(c?.experience || '0', 10);
-    const bucket =
-      years < 3
-        ? 'Entry (0-2)'
-        : years < 6
-        ? 'Mid (3-5)'
-        : years < 9
-        ? 'Senior (6-8)'
-        : 'Expert (8+)';
-    experienceData[bucket] = (experienceData[bucket] || 0) + 1;
-  });
+ // === Dynamic Experience Buckets ===
+const experienceData: Record<string, number> = {};
+candidates.forEach((c) => {
+  const years = Number(c?.experienceYears || 0); 
+  const bucket =
+    years < 3
+      ? 'Entry (0-2)'
+      : years < 6
+      ? 'Mid (3-5)'
+      : years < 9
+      ? 'Senior (6-8)'
+      : 'Expert (8+)';
+  experienceData[bucket] = (experienceData[bucket] || 0) + 1;
+});
+
   const experienceChartData = Object.entries(experienceData).map(([level, count]) => ({
     level,
     count,
@@ -85,7 +86,7 @@ const SearchAnalytics: React.FC<SearchAnalyticsProps> = ({ candidates, onClose }
   // === Location Distribution ===
   const locationData: Record<string, number> = {};
   candidates.forEach((c) => {
-    const city = c?.location?.split(',')[0]?.trim() || 'Unknown';
+    const city = c?.addressWithCountry?.split(',')[0]?.trim() || 'Unknown';
     locationData[city] = (locationData[city] || 0) + 1;
   });
   const locationChartData = Object.entries(locationData)

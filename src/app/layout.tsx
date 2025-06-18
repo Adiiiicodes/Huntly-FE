@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Sora } from 'next/font/google'
+import { Sora, Roboto } from 'next/font/google'
 import './globals.css'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { Toaster } from '@/components/ui/toaster'
@@ -10,12 +10,18 @@ const sora = Sora({
   variable: '--font-sora', // optional CSS variable name
 })
 
+const roboto = Roboto({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '700'],
+  variable: '--font-roboto',
+})
+
 export const metadata: Metadata = {
   title: 'HuntLy - Smart People Search Engine',
   description: 'Find the perfect talent with AI-powered search. Search professionals by skills, location, and experience.',
   keywords: 'people search, talent search, professional finder, developer search, blockchain experts, AI talent',
   authors: [{ name: 'HuntLy Team' }],
-  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://f5e8-2405-201-4a-70a0-f578-6ab7-3051-2e18.ngrok-free.app'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'http://168.231.122.158'),
   openGraph: {
     title: 'HuntLy - Smart People Search Engine',
     description: 'Find the perfect talent with AI-powered search',
@@ -35,8 +41,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={sora.variable}>
-      <body className="font-sans antialiased min-h-screen bg-background">
+    <html lang="en" className={`${sora.variable} ${roboto.variable}`}>
+      <body className="antialiased min-h-screen bg-background">
         <AuthProvider>
           {children}
           <Toaster />

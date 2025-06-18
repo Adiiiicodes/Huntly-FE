@@ -1,14 +1,19 @@
 // lib/types.ts
 
 export interface Candidate {
-  id: string;
-  name: string;
-  location: string;
+  _id: string;
+  fullName: string;
+  jobTitle: string;
+  addressWithCountry: string;
+  experienceYears: number;
   skills: string[];
-  experience?: string;
-  experience_years: number;
-  relevance_score?: number;
-  rank?: string;
+  availability: string;
+  matchScore: number;
+  summary: string | null;
+  avatar: string | null;
+  salary: number | null;
+  education: string;
+  linkedinUrl: string | null;
 }
 
 export interface ApiResponse {

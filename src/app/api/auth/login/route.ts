@@ -24,14 +24,18 @@ export async function POST(request: Request) {
       };
 
       // Set session cookie
-      cookies().set('session_token', 'dummy-session-token', {
+      (await cookies()).set('session_token', 'dummy-session-token', {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         maxAge: 60 * 60 * 24 * 7, // 1 week
       });
 
-      return NextResponse.json(user);
+      return NextResponse.json({
+        success: true,
+        token: 'dummy-session-token',
+        user: user
+      });
     }
 
     return NextResponse.json(

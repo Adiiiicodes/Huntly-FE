@@ -3,39 +3,71 @@
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { allCandidatesService } from '@/services/allCandidateService';
-import { Candidates } from '@/types/candidate';
+import { candidateService } from '@/services/candidateService';
+import { Candidate } from '@/types/candidate';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const CompareClient = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [candidates, setCandidates] = useState<Candidates[]>([]);
+  const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const idsParam = searchParams.get('ids') || searchParams.getAll('id').join(',');
-
   useEffect(() => {
-    const fetchAndFilterCandidates = async () => {
-      if (!idsParam) {
-        console.warn('No ids provided in URL');
+    const fetchCandidates = async () => {
+      const ids = searchParams?.getAll('id') || [];
+      const query = searchParams?.get('query') || '';
+
+      if (!ids.length) {
+        console.warn('No candidate IDs in URL');
         setLoading(false);
         return;
       }
 
       try {
         const allCandidates = await allCandidatesService.getAllCandidates();
-        const selectedIds = idsParam.split(',').map(id => id.trim());
-        const filtered = allCandidates.filter(c => selectedIds.includes(c._id));
-        setCandidates(filtered);
-      } catch (error) {
-        console.error('Error filtering candidates:', error);
+        const foundMap = new Map(allCandidates.map(c => [c._id, c]));
+        const result: Candidate[] = [];
+
+        const missingIds: string[] = [];
+
+        // Step 1: Check in allCandidatesService
+        ids.forEach(id => {
+          const candidate = foundMap.get(id);
+          if (candidate) {
+            result.push(candidate);
+          } else {
+            missingIds.push(id);
+          }
+        });
+
+        // Step 2: Fallback to candidateService
+        if (missingIds.length && query) {
+          const fallbackCandidates = await candidateService.searchCandidates(query);
+
+          const fallbackMap = new Map(fallbackCandidates.map(c => [c.id, c]));
+
+          missingIds.forEach(id => {
+            const fallbackCandidate = fallbackMap.get(id);
+            if (fallbackCandidate) {
+              result.push(fallbackCandidate);
+            } else {
+              console.warn(`Candidate with ID ${id} not found in fallback either.`);
+            }
+          });
+        }
+
+        setCandidates(result);
+      } catch (err) {
+        console.error('Error fetching candidates:', err);
       }
+
       setLoading(false);
     };
 
-    fetchAndFilterCandidates();
-  }, [idsParam]);
+    fetchCandidates();
+  }, [searchParams]);
 
   const formatExperience = (value: string | number) => {
     const exp = Number(value);
@@ -71,7 +103,7 @@ const CompareClient = () => {
                 <th className="p-4 w-48 text-gray-600 font-medium">Feature</th>
                 {candidates.map((candidate, idx) => (
                   <th
-                    key={candidate._id}
+                    key={candidate.id}
                     className={`p-4 text-center text-black font-semibold ${
                       idx > 0 ? 'border-l border-gray-300' : ''
                     }`}
@@ -82,16 +114,16 @@ const CompareClient = () => {
               </tr>
             </thead>
             <tbody>
-              <CompareRow label="Role" values={candidates.map((c) => c.jobTitle || '-')} />
-              <CompareRow label="Location" values={candidates.map((c) => c.addressWithCountry || '-')} />
+              <CompareRow label="Role" values={candidates.map(c => c.jobTitle || '-')} />
+              <CompareRow label="Location" values={candidates.map(c => c.addressWithCountry || '-')} />
               <CompareRow
                 label="Experience"
-                values={candidates.map((c) => formatExperience(c.experienceYears || 0))}
+                values={candidates.map(c => formatExperience(c.experienceYears || 0))}
               />
-              <CompareRow label="Availability" values={candidates.map((c) => c.availability || '-')} />
-              <CompareRow label="Skills" values={candidates.map((c) => c.skills?.join(', ') || '-')} />
-              <CompareRow label="Education" values={candidates.map((c) => c.education || '-')} />
-              <CompareRow label="Email" values={candidates.map((c) => c.email || '-')} />
+              <CompareRow label="Availability" values={candidates.map(c => c.availability || '-')} />
+              <CompareRow label="Skills" values={candidates.map(c => c.skills?.join(', ') || '-')} />
+              <CompareRow label="Education" values={candidates.map(c => c.education || '-')} />
+              <CompareRow label="Email" values={candidates.map(c => c.email || '-')} />
             </tbody>
           </table>
         </div>
