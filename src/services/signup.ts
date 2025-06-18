@@ -1,4 +1,5 @@
 import { SignupRequest } from '@/types/auth';
+import { cookies } from 'next/headers';
 
 // Get the API URL from environment or use the IP as fallback
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://168.231.122.158';
@@ -55,7 +56,8 @@ export const signup = async (data: SignupRequest): Promise<SignupResponse> => {
       if (response.ok) {
         if (responseData.token && responseData.user) {
           // Store the token for future requests
-          localStorage.setItem('token', responseData.token);
+          const cookieStore = await cookies();
+          cookieStore.set('session_token', responseData.token);
           localStorage.setItem('user', JSON.stringify(responseData.user));
           
           // Log success for debugging
@@ -127,7 +129,8 @@ const signupWithRelativeUrl = async (data: SignupRequest): Promise<SignupRespons
     
     // Store auth data
     if (responseData.token && responseData.user) {
-      localStorage.setItem('token', responseData.token);
+      const cookieStore = await cookies();
+      cookieStore.set('session_token', responseData.token);
       localStorage.setItem('user', JSON.stringify(responseData.user));
     }
     

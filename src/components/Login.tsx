@@ -41,7 +41,7 @@ const Login = () => {
       console.log('Attempting login with:', { name, password: '*****' });
       
       // Use the login service with name instead of email
-      const response = await login({ name, password });
+      const response = await login({ username: name, password });
 
       console.log('Login response:', response);
 

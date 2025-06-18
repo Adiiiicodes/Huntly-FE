@@ -3,22 +3,25 @@ import { cookies } from 'next/headers';
 
 export async function POST(request: Request) {
   try {
-    const { email, password } = await request.json();
+    const { username, password } = await request.json();
 
-    if (!email || !password) {
+    if (( !username) || !password) {
       return NextResponse.json(
-        { error: 'Email and password are required' },
+        { error: 'Username and password are required' },
         { status: 400 }
       );
     }
 
-    // TODO: Validate credentials against your database
-    // This is a placeholder - replace with your actual authentication logic
-    if (email === 'john@example.com' && password === 'password') {
+    // Accept login with either email or username
+    const validUser = (
+      (username === 'john') && password === 'password'
+    );
+
+    if (validUser) {
       const user = {
         id: '1',
         name: 'John Doe',
-        email: 'john@example.com',
+        username: 'john',
         role: 'recruiter',
         companyName: 'Example Corp',
       };
@@ -31,11 +34,7 @@ export async function POST(request: Request) {
         maxAge: 60 * 60 * 24 * 7, // 1 week
       });
 
-      return NextResponse.json({
-        success: true,
-        token: 'dummy-session-token',
-        user: user
-      });
+      return NextResponse.json(user);
     }
 
     return NextResponse.json(
