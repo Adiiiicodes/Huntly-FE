@@ -75,7 +75,7 @@ const SignIn = () => {
         toast({
           variant: "success",
           title: "Sign Up Successful!",
-          description: "Welcome to HunTly! Your account has been created.",
+          description: "Welcome to HuntLy! Your account has been created.",
         });
         router.push('/dashboard');
       } else {
@@ -97,7 +97,7 @@ const SignIn = () => {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Sign In to HunTly</CardTitle>
+          <CardTitle className="text-2xl font-bold">Sign In to HuntLy</CardTitle>
           <CardDescription>Create your account</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

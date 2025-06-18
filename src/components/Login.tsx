@@ -61,7 +61,7 @@ const LoginWithParams = () => {
         toast({
           variant: "default",
           title: "Login Successful!",
-          description: "Welcome back to HunTly!",
+          description: "Welcome back to HuntLy!",
         });
         
         console.log(`Redirecting to ${callbackUrl}...`);
@@ -110,7 +110,7 @@ const LoginWithParams = () => {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Login to HunTly</CardTitle>
+          <CardTitle className="text-2xl font-bold">Login to HuntLy</CardTitle>
           <CardDescription>
             {callbackUrl !== '/dashboard' 
               ? 'Authentication required to access this page' 

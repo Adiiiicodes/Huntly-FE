@@ -16,7 +16,7 @@ const Footer: React.FC = () => {
                 <Zap className="w-6 h-6 text-black" />
               </div>
               <div>
-                <h3 className="text-xl font-bold">HunTly</h3>
+                <h3 className="text-xl font-bold">HuntLy</h3>
                 <p className="text-sm text-gray-400">AI-Powered Hiring</p>
               </div>
             </div>
@@ -89,12 +89,12 @@ const Footer: React.FC = () => {
         {/* Bottom Section */}
         <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-gray-400 text-sm">
-            © 2024 HunTly. All rights reserved.
+            © 2024 HuntLy. All rights reserved.
           </p>
           <div className="flex items-center space-x-6 mt-4 md:mt-0">
             <div className="flex items-center space-x-2 text-gray-400 text-sm">
               <Mail className="w-4 h-4" />
-              <span>contact@huntly.com</span>
+              <span>contact@HuntLy.com</span>
             </div>
             <div className="text-gray-400 text-sm">
               Developed by Project:X

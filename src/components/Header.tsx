@@ -38,7 +38,7 @@ const Header: React.FC = () => {
       <div className="container mx-auto px-4 sm:px-6 py-4">
         <div className="flex justify-between items-center">
           <Link href="/" className="text-xl sm:text-2xl font-bold text-black">
-            HunTly
+            HuntLy
           </Link>
 
           {/* Desktop Navigation */}

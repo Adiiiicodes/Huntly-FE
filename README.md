@@ -46,8 +46,8 @@ HuntLy is built with modern web technologies to ensure performance, scalability,
 ### Installation
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/huntly.git
-cd huntly
+git clone https://github.com/your-username/HuntLy.git
+cd HuntLy
 
 # Install dependencies
 npm install
