@@ -1,18 +1,28 @@
 // CandidateCard.tsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Candidate } from '../types/candidate';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { saveProfile } from '@/services/profileServices';
+import { Bookmark, BookmarkCheck } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface CandidateCardProps {
   candidate: Candidate;
+  skills?: string[];
   isSelected: boolean;
-  onToggleSelect: (candidateId: string, e: React.MouseEvent) => void; // Added event parameter
+  onToggleSelect: (candidateId: string, e: React.MouseEvent) => void;
+  hideSaveIcon?: boolean;
+  isSaved: boolean;
+  onSave?: (candidateId: string) => Promise<any>;
 }
 
-const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, isSelected, onToggleSelect }) => {
+const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, skills, isSelected, onToggleSelect, hideSaveIcon, isSaved, onSave }) => {
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
+
   const getMatchScoreColor = (score: number) => {
     if (score >= 90) return 'bg-green-100 text-green-800 border-green-200';
     if (score >= 80) return 'bg-blue-100 text-blue-800 border-blue-200';
@@ -28,64 +38,91 @@ const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, isSelected, on
     return exp || 'N/A';
   };
 
-  const handleCheckboxClick = (e: React.MouseEvent<HTMLInputElement>) => {
+  const handleSave = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
-    onToggleSelect(candidate._id, e);
+    if (isSaved) {
+      toast({
+        title: 'Profile saved already',
+        description: 'This profile is already in your saved list.',
+      });
+      return;
+    }
+    setLoading(true);
+    let result;
+    if (onSave) {
+      result = await onSave(candidate._id);
+    } else {
+      result = await saveProfile(candidate._id);
+    }
+    if (result && result.success === false && result.message?.includes('already saved')) {
+      toast({
+        title: 'Profile saved already',
+        description: 'This profile is already in your saved list.',
+      });
+    } else if (result && result.success === false) {
+      toast({
+        title: 'Failed to save profile',
+        description: result.message,
+      });
+    }
+    setLoading(false);
   };
+
+  const displaySkills = skills || candidate.skills || [];
 
   return (
     <Card
-      className={`p-6 hover:shadow-lg transition-all duration-300 border-l-4 ${
+      className={`relative p-6 hover:shadow-lg transition-all duration-300 border-l-4 ${
         isSelected ? 'border-l-green-600 bg-green-50' : 'border-l-blue-500'
       }`}
     >
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-start space-x-4">
-          <input
-            type="checkbox"
-            checked={isSelected}
-            onChange={() => {}} // Empty onChange to satisfy React
-            onClick={handleCheckboxClick}
-            className="mt-2"
-          />
-          <img
-            src={
-              candidate.avatar ||
-              'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
-            }
-            alt={candidate.fullName || 'Candidate'}
-            className="w-16 h-16 rounded-full object-cover"
-            onError={(e) => {
-              (e.currentTarget as HTMLImageElement).src =
-                'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face';
-            }}
-          />
-          <div>
-            <h4 className="text-xl font-bold text-slate-900 mb-1">
-              {candidate.fullName}
-            </h4>
-            <p className="text-lg text-blue-600 font-medium mb-1">
-              {candidate.jobTitle}
-            </p>
-            <p className="text-slate-600">{candidate.addressWithCountry || 'N/A'}</p>
-          </div>
-        </div>
-
-        {candidate.matchScore !== undefined && (
-          <div className="text-right">
-            <div
-              className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getMatchScoreColor(
-                candidate.matchScore
-              )}`}
-            >
-              {candidate.matchScore}% Match
-            </div>
-            {candidate.salary && (
-              <p className="text-lg font-bold text-slate-900 mt-2">{candidate.salary}</p>
-            )}
-          </div>
+      <div className="flex items-start space-x-4">
+        {!hideSaveIcon && (
+          <button
+            className="mt-2 mr-2 text-gray-400 hover:text-blue-600"
+            onClick={handleSave}
+            title={isSaved ? "Profile saved" : "Save profile"}
+          >
+            {isSaved ? <BookmarkCheck /> : <Bookmark />}
+          </button>
         )}
+        <img
+          src={
+            candidate.avatar ||
+            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
+          }
+          alt={candidate.fullName || 'Candidate'}
+          className="w-16 h-16 rounded-full object-cover"
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).src =
+              'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face';
+          }}
+        />
+        <div>
+          <h4 className="text-xl font-bold text-slate-900 mb-1">
+            {candidate.fullName}
+          </h4>
+          <p className="text-lg text-blue-600 font-medium mb-1">
+            {candidate.jobTitle}
+          </p>
+          <p className="text-slate-600">{candidate.addressWithCountry || 'N/A'}</p>
+        </div>
       </div>
+
+      {candidate.matchScore !== undefined && (
+        <div className="text-right">
+          <div
+            className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getMatchScoreColor(
+              candidate.matchScore
+            )}`}
+          >
+            {candidate.matchScore}% Match
+          </div>
+          {candidate.salary && (
+            <p className="text-lg font-bold text-slate-900 mt-2">{candidate.salary}</p>
+          )}
+        </div>
+      )}
 
       {candidate.summary && (
         <div className="mb-4">
@@ -111,8 +148,8 @@ const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, isSelected, on
       <div className="mb-6">
         <p className="font-medium text-slate-600 mb-2">Key Skills:</p>
         <div className="flex flex-wrap gap-2">
-          {candidate.skills && candidate.skills.length > 0 ? (
-            candidate.skills.map((skill, index) => (
+          {displaySkills.length > 0 ? (
+            displaySkills.map((skill, index) => (
               <Badge
                 key={index}
                 variant="secondary"

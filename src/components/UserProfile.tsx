@@ -7,7 +7,8 @@ import { useRouter } from 'next/navigation';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { getSavedProfiles, formatProfileForDisplay } from '@/services/savedProfiles';
+import { getSavedProfiles, formatProfileForDisplay, saveProfile, removeProfile } from '@/services/savedProfiles';
+import BookmarkIcon from '@/components/BookmarkIcon';
 
 interface SavedCandidate {
   id: string;
@@ -102,6 +103,13 @@ const UserProfile = () => {
       .toUpperCase();
   };
 
+  const handleSaveClick = async (candidateId: string) => {
+    if (!savedCandidates.some(c => c.id === candidateId)) {
+      await saveProfile(candidateId);
+      setSavedCandidates(prev => [...prev, { id: candidateId, name: '', position: '' }]);
+    }
+  };
+
   return (
     <div className="relative" ref={dropdownRef} style={{ border: '2px solid transparent', padding: '2px', borderRadius: '8px' }}>
       <Button
@@ -118,14 +126,14 @@ const UserProfile = () => {
           </Avatar>
           <span className="text-sm font-medium">{user.name?.split(' ')[0] || 'User'}</span>
         </div>
-        <ChevronDown className="h-4 w-4 text-white" />
+        <ChevronDown className="h-4 w-4 text-black" />
       </Button>
 
       {isOpen && (
         <div className="absolute right-0 mt-2 w-72 bg-white rounded-md shadow-lg z-50 py-1 border border-gray-200">
           <div className="px-4 py-3 border-b border-gray-100">
-            <p className="text-sm font-medium">{user.name}</p>
-            <p className="text-xs text-gray-500">{user.email}</p>
+            <p className="text-sm text-gray-700 font-medium">{user.name}</p>
+            <p className="text-xs text-gray-600">{user.email}</p>
           </div>
 
           <div className="py-2">
@@ -155,7 +163,7 @@ const UserProfile = () => {
             
             {isLoading ? (
               <div className="flex justify-center items-center py-4">
-                <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />
+                <Loader2 className="h-5 w-5 text-gray-600 animate-spin" />
                 <span className="ml-2 text-sm text-gray-500">Loading profiles...</span>
               </div>
             ) : error ? (
@@ -177,7 +185,7 @@ const UserProfile = () => {
                       <div className="flex justify-between items-center">
                         <p className="text-xs text-gray-500 truncate">{candidate.position}</p>
                         {candidate.lastActivity && (
-                          <p className="text-xs text-gray-400 ml-1">{candidate.lastActivity}</p>
+                          <p className="text-xs text-gray-600 ml-1">{candidate.lastActivity}</p>
                         )}
                       </div>
                     </div>

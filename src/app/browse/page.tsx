@@ -15,6 +15,8 @@ import {
 import { Search, SlidersHorizontal } from "lucide-react";
 import { allCandidatesService } from "@/services/allCandidateService";
 import { Candidate } from "@/types/candidate";
+import { getSavedProfiles, saveProfile } from "@/services/savedProfiles";
+import { useAuth } from "@/contexts/AuthContext";
 
 const ITEMS_PER_PAGE = 6;
 
@@ -29,6 +31,8 @@ const Browse: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCandidates, setSelectedCandidates] = useState<Candidate[]>([]);
   const [showCompare, setShowCompare] = useState(false);
+  const { user } = useAuth();
+  const [savedCandidateIds, setSavedCandidateIds] = useState<string[]>([]);
 
   const fetchCandidates = async () => {
     setLoading(true);
@@ -44,6 +48,16 @@ const Browse: React.FC = () => {
   useEffect(() => {
     fetchCandidates();
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      getSavedProfiles(user.id)
+        .then((profiles) => {
+          setSavedCandidateIds(profiles.map((p) => p._id));
+        })
+        .catch(() => setSavedCandidateIds([]));
+    }
+  }, [user]);
 
   const clearFilters = () => {
     setSearchTerm("");
@@ -67,6 +81,18 @@ const Browse: React.FC = () => {
 
   const isCandidateSelected = (candidate: Candidate) =>
     selectedCandidates.some((c) => c._id === candidate._id);
+
+  const handleSaveProfile = async (candidateId: string) => {
+    try {
+      const result = await saveProfile(candidateId);
+      if (result && result.success !== false) {
+        setSavedCandidateIds((prev) => [...prev, candidateId]);
+      }
+      return result;
+    } catch (e) {
+      return { success: false, message: 'Failed to save profile' };
+    }
+  };
 
   const filteredCandidates = candidates.filter((candidate) => {
     const searchLower = searchTerm.toLowerCase();
@@ -207,6 +233,8 @@ const Browse: React.FC = () => {
                 candidate={candidate}
                 isSelected={isCandidateSelected(candidate)}
                 onToggleSelect={() => handleToggleSelect(candidate)}
+                isSaved={savedCandidateIds.includes(candidate._id)}
+                onSave={handleSaveProfile}
               />
             ))
           ) : (

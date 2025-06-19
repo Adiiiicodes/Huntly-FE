@@ -33,7 +33,7 @@ interface SavedProfile {
   
       console.log('Fetching saved profiles...');
       
-      const response = await fetch(`${API_URL}/api/profiles/saved`, {
+      const response = await fetch(`${API_URL}/api/profiles/save/`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -88,7 +88,7 @@ interface SavedProfile {
   
       console.log(`Saving profile with ID: ${candidateId}`);
       
-      const response = await fetch(`${API_URL}/api/profiles/save/${candidateId}`, {
+      const response = await fetch(`/api/profiles/save/${candidateId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -105,7 +105,7 @@ interface SavedProfile {
           errorMessage = await response.text();
         }
         
-        throw new Error(`Failed to save profile: ${errorMessage}`);
+        return { success: false, message: errorMessage };
       }
   
       const data = await response.json();
