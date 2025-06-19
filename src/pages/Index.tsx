@@ -221,7 +221,7 @@ const IndexPageContent = () => {
               <div className="bg-black text-white rounded-xl sm:rounded-2xl md:rounded-3xl p-4 sm:p-6 md:p-12 mb-10 md:mb-20">
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
                   <div className="text-center">
-                    <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-3">1000+</div>
+                    <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-3">2000+</div>
                     <div className="text-gray-300 text-sm sm:text-base md:text-lg">Verified Candidates</div>
                   </div>
                   <div className="text-center">
