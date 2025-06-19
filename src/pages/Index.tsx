@@ -312,7 +312,7 @@ const IndexPageContent = () => {
         <div className="flex flex-col sm:flex-row justify-center items-center space-y-2 sm:space-y-0 sm:space-x-4">
           <Button
             onClick={handleAISearch}
-            disabled={isSearching || !query.trim()}
+            //disabled={isSearching || !query.trim()}
             className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg sm:rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 text-xs sm:text-sm"
           >
             <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
@@ -320,7 +320,7 @@ const IndexPageContent = () => {
           </Button>
           <Button
             onClick={handleAnalyticsSearch}
-            disabled={isSearching || !query.trim() || candidates.length === 0}
+            //disabled={isSearching || !query.trim() || candidates.length === 0}
             className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg sm:rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 text-xs sm:text-sm mt-2 sm:mt-0 sm:ml-4"
           >
             <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
