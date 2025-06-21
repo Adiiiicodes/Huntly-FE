@@ -233,7 +233,7 @@ const IndexPageContent = () => {
                     <div className="text-gray-300 text-sm sm:text-base md:text-lg">Avg. Search Time</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-3">500+</div>
+                    <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-3">5+</div>
                     <div className="text-gray-300 text-sm sm:text-base md:text-lg">Companies Trust Us</div>
                   </div>
                 </div>
