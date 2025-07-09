@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, Suspense, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Search,
@@ -37,9 +37,78 @@ const IndexPageContent = () => {
   
   const [query, setQuery] = useState(getQueryParam());
   const [isSearching, setIsSearching] = useState(false);
+  const [isRanking, setIsRanking] = useState(false);
   const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const [initialResponseData, setInitialResponseData] = useState<string>('');
   const [selectedCandidates, setSelectedCandidates] = useState<string[]>([]);
   const [showAnalytics, setShowAnalytics] = useState(false);
+
+  // Define performSearch function with useCallback to avoid dependency issues
+  const performSearch = useCallback(async (searchQuery: string, updateUrl = true) => {
+    if (!searchQuery.trim()) return;
+
+    setIsSearching(true);
+    try {
+      const results = await candidateService.searchCandidates(searchQuery);
+
+      const fixedResults = results.map((candidate, index) => ({
+        ...candidate,
+        _id: candidate._id || candidate.id || `fallback-${index}`,
+      }));
+
+      if (updateUrl) {
+        const params = new URLSearchParams();
+        params.set('query', searchQuery);
+        router.replace(`/?${params.toString()}`, { scroll: false });
+      }
+
+      // Store the raw response data for the ranked analysis
+      const responseData = JSON.stringify(fixedResults);
+      setInitialResponseData(responseData);
+      
+      setCandidates(fixedResults);
+      setShowAnalytics(false);
+    } catch (error) {
+      console.error('Search error:', error);
+    } finally {
+      setIsSearching(false);
+    }
+  }, [router]);
+
+  // Handle Ranked Analysis
+  const handleAISearch = useCallback(async () => {
+    if (!query.trim() || !initialResponseData) {
+      // If there's no initial response data, perform a regular search first
+      if (!initialResponseData && query.trim()) {
+        await performSearch(query.trim());
+      }
+      return;
+    }
+    
+    setIsRanking(true);
+    try {
+      // Use the stored initial response data for ranking
+      const results = await rankService.rankCandidates(query, initialResponseData);
+
+      if (results && results.length > 0) {
+        const fixedResults = results.map((candidate, index) => ({
+          ...candidate,
+          _id: candidate._id || candidate.id || `fallback-${index}`,
+        }));
+
+        const params = new URLSearchParams();
+        params.set('query', query);
+        router.replace(`/?${params.toString()}`, { scroll: false });
+
+        setCandidates(fixedResults);
+        setShowAnalytics(false);
+      }
+    } catch (error) {
+      console.error('AI Search error:', error);
+    } finally {
+      setIsRanking(false);
+    }
+  }, [query, initialResponseData, performSearch, router]);
 
   // Authentication check effect
   useEffect(() => {
@@ -57,7 +126,30 @@ const IndexPageContent = () => {
         performSearch(urlQuery, false);
       }
     }
-  }, [candidates.length, query]);
+  }, [candidates.length, query, performSearch]);
+
+  // Function to handle form submission
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    performSearch(query.trim());
+  };
+
+  const handleAnalyticsSearch = () => {
+    setShowAnalytics(true);
+  };
+
+  const toggleSelectCandidate = (id: string) => {
+    setSelectedCandidates((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  const handleCompare = () => {
+    const queryParams = new URLSearchParams();
+    selectedCandidates.forEach((id) => queryParams.append('id', id));
+    queryParams.append('query', query);
+    router.push(`/compare?${queryParams.toString()}`);
+  };
 
   // Show loading state during authentication check
   if (isLoading) {
@@ -78,86 +170,13 @@ const IndexPageContent = () => {
     return null;
   }
 
-  const performSearch = async (searchQuery: string, updateUrl = true) => {
-    if (!searchQuery.trim()) return;
-
-    setIsSearching(true);
-    try {
-      const results = await candidateService.searchCandidates(searchQuery);
-
-      const fixedResults = results.map((candidate, index) => ({
-        ...candidate,
-        _id: candidate._id || candidate.id || `fallback-${index}`,
-      }));
-
-      if (updateUrl) {
-        const params = new URLSearchParams();
-        params.set('query', searchQuery);
-        router.replace(`/?${params.toString()}`, { scroll: false });
-      }
-
-      setCandidates(fixedResults);
-      setShowAnalytics(false);
-    } catch (error) {
-      console.error('Search error:', error);
-    } finally {
-      setIsSearching(false);
-    }
-  };
-
-  const handleAISearch = async () => {
-    if (!query.trim()) return;
-    setIsSearching(true);
-    try {
-      const initialResponse = `These are some candidates based on the query: "${query}"`;
-      const results = await rankService.rankCandidates(query, initialResponse);
-
-      const fixedResults = results.map((candidate, index) => ({
-        ...candidate,
-        _id: candidate._id || candidate.id || `fallback-${index}`,
-      }));
-
-      const params = new URLSearchParams();
-      params.set('query', query);
-      router.replace(`/?${params.toString()}`, { scroll: false });
-
-      setCandidates(fixedResults);
-      setShowAnalytics(false);
-    } catch (error) {
-      console.error('AI Search error:', error);
-    } finally {
-      setIsSearching(false);
-    }
-  };
-
-  const handleAnalyticsSearch = () => {
-    setShowAnalytics(true);
-  };
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    performSearch(query.trim());
-  };
-
-  const toggleSelectCandidate = (id: string) => {
-    setSelectedCandidates((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
-  };
-
-  const handleCompare = () => {
-    const queryParams = new URLSearchParams();
-    selectedCandidates.forEach((id) => queryParams.append('id', id));
-    queryParams.append('query', query);
-    router.push(`/compare?${queryParams.toString()}`);
-  };
-
   const exampleQueries = [
     'Senior Gen-AI engineer, Europe, contract based',
     'Full-stack developer with React, 3+ years, remote',
     'Data scientist with Python and ML experience, US',
     'DevOps engineer, AWS certified, permanent role',
   ];
+  
   return (
     <div className="max-w-7xl mx-auto mb-16 px-2 sm:px-4 relative">
       {/* Hero Section */}
@@ -312,15 +331,24 @@ const IndexPageContent = () => {
         <div className="flex flex-col sm:flex-row justify-center items-center space-y-2 sm:space-y-0 sm:space-x-4">
           <Button
             onClick={handleAISearch}
-            //disabled={isSearching || !query.trim()}
+            disabled={isRanking || (!initialResponseData && !query.trim())}
             className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg sm:rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 text-xs sm:text-sm"
           >
-            <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-            Ranked Search
+            {isRanking ? (
+              <div className="flex items-center space-x-1 sm:space-x-2">
+                <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span>Ranking...</span>
+              </div>
+            ) : (
+              <>
+                <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                Ranked Search
+              </>
+            )}
           </Button>
           <Button
             onClick={handleAnalyticsSearch}
-            //disabled={isSearching || !query.trim() || candidates.length === 0}
+            disabled={isSearching || candidates.length === 0}
             className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg sm:rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 text-xs sm:text-sm mt-2 sm:mt-0 sm:ml-4"
           >
             <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
