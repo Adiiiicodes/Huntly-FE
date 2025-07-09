@@ -12,6 +12,7 @@ import {
   Shield,
   Award,
   Globe,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -43,9 +44,27 @@ const IndexPageContent = () => {
   const [selectedCandidates, setSelectedCandidates] = useState<string[]>([]);
   const [showAnalytics, setShowAnalytics] = useState(false);
 
+  // Track if search is active - separate from whether candidates exist
+  const [searchActive, setSearchActive] = useState(false);
+
+  // Clear search function
+  const clearSearch = useCallback(() => {
+    setQuery('');
+    setCandidates([]);
+    setInitialResponseData('');
+    setSelectedCandidates([]);
+    setSearchActive(false);
+    
+    // Clear URL query parameter
+    router.replace('/', { scroll: false });
+  }, [router]);
+
   // Define performSearch function with useCallback to avoid dependency issues
   const performSearch = useCallback(async (searchQuery: string, updateUrl = true) => {
-    if (!searchQuery.trim()) return;
+    if (!searchQuery.trim()) {
+      clearSearch();
+      return;
+    }
 
     setIsSearching(true);
     try {
@@ -68,12 +87,13 @@ const IndexPageContent = () => {
       
       setCandidates(fixedResults);
       setShowAnalytics(false);
+      setSearchActive(true);
     } catch (error) {
       console.error('Search error:', error);
     } finally {
       setIsSearching(false);
     }
-  }, [router]);
+  }, [router, clearSearch]);
 
   // Handle Ranked Analysis
   const handleAISearch = useCallback(async () => {
@@ -96,10 +116,6 @@ const IndexPageContent = () => {
           _id: candidate._id || candidate.id || `fallback-${index}`,
         }));
 
-        const params = new URLSearchParams();
-        params.set('query', query);
-        router.replace(`/?${params.toString()}`, { scroll: false });
-
         setCandidates(fixedResults);
         setShowAnalytics(false);
       }
@@ -108,7 +124,7 @@ const IndexPageContent = () => {
     } finally {
       setIsRanking(false);
     }
-  }, [query, initialResponseData, performSearch, router]);
+  }, [query, initialResponseData, performSearch]);
 
   // Authentication check effect
   useEffect(() => {
@@ -122,16 +138,28 @@ const IndexPageContent = () => {
     const urlQuery = getQueryParam();
     if (urlQuery) {
       setQuery(urlQuery);
-      if (candidates.length === 0 || urlQuery !== query) {
+      if (!searchActive) {
         performSearch(urlQuery, false);
       }
     }
-  }, [candidates.length, query, performSearch]);
+  }, [performSearch, searchActive]);
 
   // Function to handle form submission
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    // Check if query is empty
+    if (!query.trim()) {
+      clearSearch();
+      return;
+    }
+    
     performSearch(query.trim());
+  };
+
+  // Handle query input change
+  const handleQueryChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setQuery(e.target.value);
   };
 
   const handleAnalyticsSearch = () => {
@@ -302,28 +330,39 @@ const IndexPageContent = () => {
         <div className="relative group">
           <Textarea
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={handleQueryChange}
             placeholder="Describe your ideal candidate..."
             className="min-h-[100px] sm:min-h-[120px] md:min-h-[140px] text-base sm:text-lg px-4 py-4 sm:px-6 sm:py-5 md:px-8 md:py-6 pr-24 sm:pr-32 border-2 border-gray-200 rounded-lg sm:rounded-xl md:rounded-2xl resize-none bg-white shadow-lg transition-all duration-300 placeholder:text-gray-400 text-black"
             disabled={isSearching}
           />
-          <Button
-            type="submit"
-            disabled={isSearching || !query.trim()}
-            className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 md:bottom-6 md:right-6 bg-black hover:bg-gray-800 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 text-xs sm:text-sm"
-          >
-            {isSearching ? (
-              <div className="flex items-center space-x-1 sm:space-x-2">
-                <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                <span>Searching...</span>
-              </div>
-            ) : (
-              <div className="flex items-center space-x-1 sm:space-x-2">
-                <Search className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" />
-                <span>Search</span>
-              </div>
+          <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 md:bottom-6 md:right-6 flex space-x-2">
+            {searchActive && (
+              <Button
+                type="button"
+                onClick={clearSearch}
+                className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-2 py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-300"
+              >
+                
+              </Button>
             )}
-          </Button>
+            <Button
+              type="submit"
+              disabled={isSearching}
+              className="bg-black hover:bg-gray-800 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 text-xs sm:text-sm"
+            >
+              {isSearching ? (
+                <div className="flex items-center space-x-1 sm:space-x-2">
+                  <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Searching...</span>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-1 sm:space-x-2">
+                  <Search className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" />
+                  <span>Search</span>
+                </div>
+              )}
+            </Button>
+          </div>
         </div>
       </form>
 
@@ -363,7 +402,10 @@ const IndexPageContent = () => {
           {exampleQueries.map((example, index) => (
             <button
               key={index}
-              onClick={() => performSearch(example)}
+              onClick={() => {
+                setQuery(example);
+                performSearch(example);
+              }}
               className="group px-3 py-1 sm:px-4 sm:py-2 md:px-6 md:py-3 bg-white border border-gray-200 rounded-full text-xs sm:text-sm text-gray-700 hover:bg-black hover:text-white hover:border-black transition-all duration-300 hover:shadow-md hover:-translate-y-0.5"
               disabled={isSearching}
               type="button"
