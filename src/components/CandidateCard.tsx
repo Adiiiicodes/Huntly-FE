@@ -1,10 +1,11 @@
 // CandidateCard.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { Candidate } from '../types/candidate';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Bookmark, BookmarkCheck } from 'lucide-react';
 
 interface CandidateCardProps {
   candidate: Candidate;
@@ -33,12 +34,65 @@ const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, isSelected, on
     onToggleSelect(candidate._id, e);
   };
 
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const handleSaveProfile = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Add a subtle scale animation
+    const button = e.currentTarget;
+    button.classList.add('scale-110');
+    setTimeout(() => button.classList.remove('scale-110'), 200);
+    
+    setSaving(true);
+    try {
+      const token = localStorage.getItem('token'); // or 'session_token'
+      const res = await fetch(`/api/profiles/save/${candidate._id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        credentials: 'include',
+      });
+      if (res.ok) {
+        setSaved(true);
+      }
+    } catch (err) {
+      // handle error
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <Card
-      className={`p-6 hover:shadow-lg transition-all duration-300 border-l-4 ${
+      className={`p-6 hover:shadow-lg transition-all duration-300 border-l-4 relative ${
         isSelected ? 'border-l-green-600 bg-green-50' : 'border-l-blue-500'
       }`}
     >
+      {/* Instagram-style Save Button */}
+      <button
+        onClick={handleSaveProfile}
+        disabled={saving}
+        className={`absolute top-4 right-4 p-2 rounded-full transition-all duration-200 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300 ${
+          saving ? 'opacity-50 cursor-not-allowed' : ''
+        }`}
+        aria-label={saved ? 'Saved' : 'Save profile'}
+      >
+        {saved ? (
+          <BookmarkCheck 
+            className="w-6 h-6 text-gray-900 fill-current transition-transform duration-200" 
+          />
+        ) : (
+          <Bookmark 
+            className="w-6 h-6 text-gray-700 hover:text-gray-900 transition-colors duration-200" 
+          />
+        )}
+      </button>
+
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-start space-x-4">
           <input
@@ -60,7 +114,7 @@ const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, isSelected, on
                 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face';
             }}
           />
-          <div>
+          <div className="pr-12"> {/* Add padding to prevent overlap with save button */}
             <h4 className="text-xl font-bold text-slate-900 mb-1">
               {candidate.fullName}
             </h4>
@@ -72,7 +126,7 @@ const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, isSelected, on
         </div>
 
         {candidate.matchScore !== undefined && (
-          <div className="text-right">
+          <div className="text-right mr-12"> {/* Add margin to prevent overlap */}
             <div
               className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getMatchScoreColor(
                 candidate.matchScore
@@ -127,7 +181,7 @@ const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, isSelected, on
         </div>
       </div>
 
-      <div className="flex space-x-3">
+      <div className="flex space-x-3 mt-4">
         <Button variant="outline" className="w-full flex-1 text-white" asChild>
           <Link href={`/candidate/${candidate._id}`}>
             View Full Profile
