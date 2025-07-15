@@ -14,10 +14,18 @@ export async function OPTIONS() {
 
 export async function POST(request: NextRequest) {
   try {
+<<<<<<< Updated upstream
     // Get the backend API URL from environment variable
     const apiUrl = process.env.API_BASE_URL || 'https://7a71-114-79-138-174.ngrok-free.app';
     
     // Get the question from the request body
+=======
+    // Use ranker backend API URL
+    const apiUrl =
+      process.env.API_BASE_URL ||
+      'http://localhost:6969';
+
+>>>>>>> Stashed changes
     const body = await request.json();
     
     console.log('Proxying chat request to backend:', `${apiUrl}/api/chat`);
