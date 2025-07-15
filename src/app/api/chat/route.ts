@@ -14,6 +14,7 @@ export async function OPTIONS() {
 
 export async function POST(request: NextRequest) {
   try {
+<<<<<<< HEAD
 <<<<<<< Updated upstream
     // Get the backend API URL from environment variable
     const apiUrl = process.env.API_BASE_URL || 'https://7a71-114-79-138-174.ngrok-free.app';
@@ -26,12 +27,18 @@ export async function POST(request: NextRequest) {
       'http://localhost:6969';
 
 >>>>>>> Stashed changes
+=======
+    // Use ranker backend API URL
+    const apiUrl =
+      process.env.API_BASE_URL ||
+      'http://168.231.122.158';
+
+>>>>>>> 1ff46bdf11fb02a18a63b7421b9cf04e65884ba5
     const body = await request.json();
-    
+
     console.log('Proxying chat request to backend:', `${apiUrl}/api/chat`);
     console.log('Request body:', body);
-    
-    // Forward the request to the actual backend
+
     const response = await fetch(`${apiUrl}/api/chat`, {
       method: 'POST',
       headers: {
@@ -39,26 +46,48 @@ export async function POST(request: NextRequest) {
       },
       body: JSON.stringify(body)
     });
-    
-    // If the backend returns an error, log details and throw
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Backend error (${response.status}):`, errorText);
-      throw new Error(`Backend responded with status: ${response.status}`);
+
+    const contentType = response.headers.get('content-type');
+    const rawText = await response.text();
+
+    let data;
+    if (contentType?.includes('application/json')) {
+      data = JSON.parse(rawText);
+    } else {
+      console.error('Expected JSON but got:', rawText);
+      return NextResponse.json(
+        {
+          error: 'Backend did not return JSON',
+          answer: '<p>The backend service returned unexpected data.</p>',
+          raw: rawText,
+          cached: false
+        },
+        { status: 500 }
+      );
     }
-    
-    // Parse and return the backend response
-    const data = await response.json();
+
+    if (!response.ok) {
+      console.error(`Backend error (${response.status}):`, data);
+      return NextResponse.json(
+        {
+          error: 'Backend returned an error response',
+          data
+        },
+        { status: response.status }
+      );
+    }
+
+    console.log('Backend response data:', data);
     return NextResponse.json(data);
-    
+
   } catch (error) {
     console.error('Chat API error:', error);
-    
-    // Return a friendly error message
+
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to process your search request',
-        answer: '<p>Sorry, there was an error processing your search request. Please try again later.</p>',
+        answer:
+          '<p>Sorry, there was an error processing your search request. Please try again later.</p>',
         cached: false
       },
       { status: 500 }

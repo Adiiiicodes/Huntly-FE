@@ -1,135 +1,95 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --primary: #656469;         
-  --secondary: #656469;
-  --background: #e0e2e4;
-  --accent: #656469;
-  --foreground: #242229;
-  --card: #1a1a1c;
-  --border: #2a2a2d;
-  --success: #10b981;
-}
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
 
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
 
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
 
-html {
-  overflow-x: hidden;
-  scroll-behavior: smooth;
-}
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-roboto), system-ui, -apple-system, sans-serif;
-  letter-spacing: -0.025em;
-  line-height: 1.6;
-  overflow-x: hidden;
-}
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
 
-@layer components {
-  .section-container {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 0 0% 45.1%;
+    --sidebar-primary: 0 0% 9%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 0 0% 96.1%;
+    --sidebar-accent-foreground: 0 0% 9%;
+    --sidebar-border: 0 0% 89.8%;
+    --sidebar-ring: 0 0% 3.9%;
   }
 
-  .search-input {
-    @apply w-full px-6 py-4 bg-[#242229] border border-border rounded-full 
-           text-foreground placeholder-foreground/50 
-           focus:outline-none focus:ring-0;
-  }
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
 
-  .btn-primary {
-    @apply bg-primary text-white px-6 py-3 rounded-lg font-medium 
-           hover:bg-primary/90 transform hover:scale-105 
-           transition-all duration-200 inline-flex items-center gap-2
-           shadow-lg hover:shadow-xl;
-  }
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
 
-  .btn-secondary {
-    @apply bg-card border border-border text-foreground px-6 py-3 
-           rounded-lg font-medium hover:bg-accent/10 hover:border-accent 
-           transition-all duration-200 inline-flex items-center gap-2;
-  }
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
 
-  .gradient-text {
-  @apply bg-gradient-to-r from-[#242229] via-[#656469] to-[#656469] 
-         bg-clip-text text-transparent animate-gradient;
-}
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
 
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
 
-  .glass-effect {
-    @apply bg-accent/30 backdrop-blur-lg border border-border/20;
-  }
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
 
-  .search-suggestion {
-  @apply px-4 py-3 text-sm border border-border/10 rounded-lg 
-         text-secondary backdrop-blur-md cursor-pointer 
-         transition-colors duration-150 ease-in-out bg-secondary/10 ;
-}
-}
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
 
-.search-suggestion:hover {
-  background: linear-gradient(
-    135deg,
-    rgba(101, 100, 105, 0.3),
-    rgba(224, 226, 228, 0.3)
-  );
-  border-color: var(--accent);
-}
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
 
-@keyframes gradient {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-}
-
-@layer components {
-  .search-btn {
-    @apply bg-primary text-white px-6 py-3 font-medium border-none
-           transition-all duration-300 shadow-sm;
-     animation: pulse-glow 2s infinite ease-in-out;
-     
-  }
-
-  .search-btn:hover {
-    box-shadow: 0 0 10px #e0e2e4, 0 0 20px #e0e2e4;
-  }
-}
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 2px #e0e2e4, 0 0 12px #e0e2e4;
-  }
-  50% {
-    box-shadow: 0 0 5px #e0e2e4, 0 0 24px #e0e2e4;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+    --sidebar-background: 0 0% 3.9%;
+    --sidebar-foreground: 0 0% 63.9%;
+    --sidebar-primary: 0 0% 98%;
+    --sidebar-primary-foreground: 0 0% 9%;
+    --sidebar-accent: 0 0% 14.9%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 0 0% 14.9%;
+    --sidebar-ring: 0 0% 83.1%;
   }
 }
 
-.animate-gradient {
-  background-size: 200% 200%;
-  animation: gradient 6s ease infinite;
-}
+@layer base {
+  * {
+    @apply border-border;
+  }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--background);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--accent);
-  border-radius: 5px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--primary);
+  body {
+    @apply text-foreground;
+  }
 }

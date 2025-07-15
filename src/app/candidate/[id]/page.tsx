@@ -88,15 +88,12 @@ const CandidateProfile: React.FC = () => {
     }
   };
 
-  type SkillType = string | { title: string };
-  
-  const buildSkillGapData = (candidateSkills: SkillType[] = []) => {
+  const buildSkillGapData = (candidateSkills: string[] = []) => {
     return requiredSkills.map(skill => ({
       skill,
-      candidate: candidateSkills.some(s => {
-        const skillStr = typeof s === 'string' ? s : (s as { title: string }).title;
-        return skillStr && skillStr.toLowerCase().includes(skill.toLowerCase());
-      }) ? 100 : 0,
+      candidate: candidateSkills.some(s => 
+        s.toLowerCase().includes(skill.toLowerCase())
+      ) ? 100 : 0,
       required: 100
     }));
   };
@@ -302,7 +299,7 @@ const CandidateProfile: React.FC = () => {
                   {candidate.skills?.length > 0 ? (
                     candidate.skills.map((skill, i) => (
                       <Badge key={i} variant="secondary" className="bg-blue-100 text-blue-800">
-                        {typeof skill === 'string' ? skill : skill.title}
+                        {skill}
                       </Badge>
                     ))
                   ) : (
@@ -414,32 +411,10 @@ const CandidateProfile: React.FC = () => {
                   </div>
                   <div>
                     <span className="font-medium text-slate-600">Education:</span>
-                    <div className="text-slate-900 flex flex-col gap-1">
-                      <span className="flex items-center">
-                        <GraduationCap className="w-4 h-4 mr-2" />
-                      </span>
-                      {Array.isArray(candidate.education) ? (
-                        candidate.education.length > 0 ? (
-                          candidate.education.map((edu, idx) => (
-                            <span key={idx}>
-                              <span className="font-semibold">{edu.school}</span>
-                              {edu.degree && `, ${edu.degree}`}
-                              {edu.description && ` - ${edu.description}`}
-                            </span>
-                          ))
-                        ) : (
-                          <span className="italic text-slate-500">No education listed</span>
-                        )
-                      ) : typeof candidate.education === 'object' && candidate.education !== null ? (
-                        <span>
-                          <span className="font-semibold">{candidate.education.school}</span>
-                          {candidate.education.degree && `, ${candidate.education.degree}`}
-                          {candidate.education.description && ` - ${candidate.education.description}`}
-                        </span>
-                      ) : (
-                        <span>{candidate.education || 'Not specified'}</span>
-                      )}
-                    </div>
+                    <p className="text-slate-900 flex items-center">
+                      <GraduationCap className="w-4 h-4 mr-2" />
+                      {candidate.education || 'Not specified'}
+                    </p>
                   </div>
                   <div>
                     <span className="font-medium text-slate-600">Availability:</span>

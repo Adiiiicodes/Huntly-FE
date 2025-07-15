@@ -3,7 +3,11 @@
 // Utility to handle backend API requests
 export async function handleApiRequest(path: string, options: RequestInit) {
   try {
+<<<<<<< HEAD
     const apiUrl = process.env.API_BASE_URL || 'http://localhost:6969';
+=======
+    const apiUrl = process.env.API_BASE_URL || 'http://168.231.122.158';
+>>>>>>> 1ff46bdf11fb02a18a63b7421b9cf04e65884ba5
     const response = await fetch(`${apiUrl}${path}`, options);
 
     const text = await response.text();

@@ -17,11 +17,15 @@ export async function OPTIONS() {
 export async function POST(request: NextRequest) {
   try {
     // Get the backend API URL from environment variable
+<<<<<<< HEAD
 <<<<<<< Updated upstream
     const apiUrl = process.env.API_BASE_URL || 'https://7a71-114-79-138-174.ngrok-free.app';
 =======
     const apiUrl = process.env.API_BASE_URL || 'http://localhost:6969';
 >>>>>>> Stashed changes
+=======
+    const apiUrl = process.env.API_BASE_URL || 'http://168.231.122.158';
+>>>>>>> 1ff46bdf11fb02a18a63b7421b9cf04e65884ba5
     
     // Get request body
     const body = await request.json();
@@ -62,13 +66,9 @@ export async function POST(request: NextRequest) {
       throw new Error(`Backend error: ${response.status} - ${errorText}`);
     }
     
-    // Get response as text first to inspect
+    // Parse the response as JSON
     const responseText = await response.text();
-    console.log('Raw backend response length:', responseText.length);
-    console.log('Raw backend response preview:', responseText.substring(0, 200));
-    
-    // Parse the response
-    let data;
+    let data: { success: any; data: any[]; };
     try {
       data = JSON.parse(responseText);
       console.log('Parsed response successfully');
