@@ -41,7 +41,7 @@ export async function fetchCandidates(query: string): Promise<Candidate[]> {
     const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:6969';
 >>>>>>> Stashed changes
 =======
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://168.231.122.158';
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:6969';
 >>>>>>> 1ff46bdf11fb02a18a63b7421b9cf04e65884ba5
     const response = await fetch(
       `${apiBaseUrl}/api/candidates/search`, 

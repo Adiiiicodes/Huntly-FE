@@ -6,7 +6,7 @@ export async function handleApiRequest(path: string, options: RequestInit) {
 <<<<<<< HEAD
     const apiUrl = process.env.API_BASE_URL || 'http://localhost:6969';
 =======
-    const apiUrl = process.env.API_BASE_URL || 'http://168.231.122.158';
+    const apiUrl = process.env.API_BASE_URL || 'http://localhost:6969';
 >>>>>>> 1ff46bdf11fb02a18a63b7421b9cf04e65884ba5
     const response = await fetch(`${apiUrl}${path}`, options);
 

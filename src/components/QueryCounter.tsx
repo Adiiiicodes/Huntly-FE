@@ -13,7 +13,7 @@ export default function QueryCounter() {
   const eventSourceRef = useRef<EventSource | null>(null);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://168.231.122.158';
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:6969';
 
   // Function to poll for updates
   const pollForUpdates = () => {

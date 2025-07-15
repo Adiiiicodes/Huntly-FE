@@ -12,10 +12,7 @@ import {
   Shield,
   Award,
   Globe,
-<<<<<<< HEAD
-=======
   X,
->>>>>>> 1ff46bdf11fb02a18a63b7421b9cf04e65884ba5
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
