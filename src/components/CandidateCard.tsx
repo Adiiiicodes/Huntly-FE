@@ -144,11 +144,7 @@ const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, isSelected, on
         )}
       </div>
 
-      {candidate.summary && (
-        <div className="mb-4">
-          <p className="text-slate-700 leading-relaxed">{candidate.summary}</p>
-        </div>
-      )}
+      
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 text-sm">
         <div>
@@ -159,38 +155,7 @@ const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, isSelected, on
           <span className="font-medium text-slate-600">Availability:</span>
           <p className="text-slate-900">{candidate.availability || 'N/A'}</p>
         </div>
-        <div>
-          <span className="font-medium text-slate-600">Education:</span>
-          {Array.isArray(candidate.education) ? (
-            candidate.education.length > 0 ? (
-              <ul className="text-slate-900 list-disc ml-4">
-                {candidate.education.map((edu, idx) => (
-                  <li key={idx}>
-                    <span className="font-semibold">{edu.school}</span>
-                    {edu.degree && `, ${edu.degree}`}
-                    {edu.description && ` - ${edu.description}`}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-slate-500 italic">No education listed</p>
-            )
-          ) : typeof candidate.education === 'object' && candidate.education !== null ? (
-            <p className="text-slate-900">
-              <span className="font-semibold">{candidate.education.school}</span>
-              {candidate.education.degree && `, ${candidate.education.degree}`}
-              {candidate.education.description && ` - ${candidate.education.description}`}
-            </p>
-          ) : (
-            <p className="text-slate-900">
-              {typeof candidate.education === 'string'
-                ? candidate.education
-                : candidate.education
-                ? `${candidate.education.school}${candidate.education.degree ? `, ${candidate.education.degree}` : ''}${candidate.education.description ? ` - ${candidate.education.description}` : ''}`
-                : 'N/A'}
-            </p>
-          )}
-        </div>
+        
       </div>
 
       <div className="mb-6">

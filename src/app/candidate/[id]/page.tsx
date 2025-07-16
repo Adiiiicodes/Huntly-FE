@@ -35,7 +35,7 @@ const CandidateProfile: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   const formatExperience = (years: number) => {
-    if (!years) return 'Not specified';
+    if (!years || isNaN(years)) return 'Not specified';
     if (years < 1) {
       const months = Math.round(years * 12);
       return `${months} month${months !== 1 ? 's' : ''}`;
@@ -48,21 +48,44 @@ const CandidateProfile: React.FC = () => {
       try {
         setLoading(true);
         setError(null);
+        
+        console.log('Fetching candidate with ID:', id);
 
-        const allCandidates = await allCandidatesService.getAllCandidates();
-        const foundCandidate = allCandidates.find(c => c.id === id || c._id === id);
-
-        if (foundCandidate) {
-          setCandidate(foundCandidate);
-          return;
+        // Try allCandidatesService first
+        try {
+          const allCandidates = await allCandidatesService.getAllCandidates();
+          console.log('All candidates received:', allCandidates.length);
+          
+          const foundCandidate = allCandidates.find(c => c.id === id || c._id === id);
+          
+          if (foundCandidate) {
+            console.log('Found candidate in allCandidates:', foundCandidate);
+            console.log('Candidate about field:', foundCandidate.about);
+            console.log('Candidate summary field:', foundCandidate.summary);
+            console.log('All candidate fields:', Object.keys(foundCandidate));
+            setCandidate(foundCandidate);
+            return;
+          }
+        } catch (allCandidatesError) {
+          console.error('Error fetching from allCandidatesService:', allCandidatesError);
         }
 
-        const searchResults = await candidateService.searchCandidates(id);
-        const searchCandidate = searchResults.find(c => c.id === id || c._id === id);
-
-        if (searchCandidate) {
-          setCandidate(searchCandidate);
-          return;
+        // Fallback to candidateService
+        try {
+          const searchResults = await candidateService.searchCandidates(id);
+          console.log('Search results received:', searchResults.length);
+          
+          const searchCandidate = searchResults.find(c => c.id === id || c._id === id);
+          
+          if (searchCandidate) {
+            console.log('Found candidate in search:', searchCandidate);
+            console.log('Search candidate about field:', searchCandidate.about);
+            console.log('Search candidate summary field:', searchCandidate.summary);
+            setCandidate(searchCandidate);
+            return;
+          }
+        } catch (searchError) {
+          console.error('Error searching candidates:', searchError);
         }
 
         throw new Error('Candidate not found');
@@ -99,6 +122,7 @@ const CandidateProfile: React.FC = () => {
     }));
   };
 
+  // Loading state
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
@@ -109,90 +133,9 @@ const CandidateProfile: React.FC = () => {
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Results
             </Button>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 space-y-6">
-                <Card>
-                  <CardHeader>
-                    <div className="flex items-start space-x-6">
-                      <Skeleton className="w-24 h-24 rounded-full" />
-                      <div className="flex-1 space-y-3">
-                        <Skeleton className="h-8 w-3/4" />
-                        <Skeleton className="h-6 w-1/2" />
-                        <Skeleton className="h-5 w-2/3" />
-                      </div>
-                    </div>
-                  </CardHeader>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <Skeleton className="h-6 w-1/4" />
-                  </CardHeader>
-                  <CardContent>
-                    <Skeleton className="h-4 w-full mb-2" />
-                    <Skeleton className="h-4 w-5/6 mb-2" />
-                    <Skeleton className="h-4 w-4/5 mb-2" />
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <Skeleton className="h-6 w-1/4" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-wrap gap-2">
-                      {[...Array(8)].map((_, i) => (
-                        <Skeleton key={i} className="h-8 w-24" />
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <Skeleton className="h-6 w-1/4" />
-                  </CardHeader>
-                  <CardContent>
-                    <Skeleton className="h-[400px] w-full" />
-                  </CardContent>
-                </Card>
-              </div>
-
-              <div className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <Skeleton className="h-6 w-1/3" />
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <Skeleton className="h-10 w-full" />
-                    <div className="space-y-2">
-                      <Skeleton className="h-4 w-3/4" />
-                      <Skeleton className="h-4 w-2/3" />
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <Skeleton className="h-6 w-1/4" />
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <Skeleton className="h-4 w-1/5 mb-1" />
-                      <Skeleton className="h-5 w-3/4" />
-                    </div>
-                    <div>
-                      <Skeleton className="h-4 w-1/5 mb-1" />
-                      <Skeleton className="h-5 w-4/5" />
-                    </div>
-                    <div>
-                      <Skeleton className="h-4 w-1/5 mb-1" />
-                      <Skeleton className="h-5 w-1/2" />
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+              <p className="mt-4 text-gray-600">Loading candidate details...</p>
             </div>
           </div>
         </main>
@@ -200,6 +143,7 @@ const CandidateProfile: React.FC = () => {
     );
   }
 
+  // Error state
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
@@ -210,11 +154,9 @@ const CandidateProfile: React.FC = () => {
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Results
             </Button>
-
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
               <strong>Error: </strong> {error}
             </div>
-
             <Button onClick={() => window.location.reload()} className="mt-4">
               Try Again
             </Button>
@@ -224,6 +166,7 @@ const CandidateProfile: React.FC = () => {
     );
   }
 
+  // No candidate found
   if (!candidate) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
@@ -234,7 +177,6 @@ const CandidateProfile: React.FC = () => {
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Results
             </Button>
-
             <div className="text-center py-12">
               <h2 className="text-xl font-semibold text-slate-700 mb-4">
                 Candidate not found
@@ -249,6 +191,7 @@ const CandidateProfile: React.FC = () => {
     );
   }
 
+  // Main render
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       <Header />
@@ -261,6 +204,7 @@ const CandidateProfile: React.FC = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
+              {/* Profile Header */}
               <Card>
                 <CardHeader>
                   <div className="flex items-start space-x-6">
@@ -268,6 +212,10 @@ const CandidateProfile: React.FC = () => {
                       src={candidate.avatar}
                       alt={candidate.fullName}
                       className="w-24 h-24 rounded-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(candidate.fullName)}`;
+                      }}
                     />
                     <div>
                       <h1 className="text-3xl font-bold text-slate-900">{candidate.fullName}</h1>
@@ -281,17 +229,22 @@ const CandidateProfile: React.FC = () => {
                 </CardHeader>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Professional Summary</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-slate-700">
-                    {candidate.summary || 'No professional summary provided.'}
-                  </p>
-                </CardContent>
-              </Card>
+              {/* Add this inside the Professional Summary Card for debugging */}
+<Card>
+  <CardHeader>
+    <CardTitle>Professional Summary</CardTitle>
+  </CardHeader>
+  <CardContent>
+    
+    
+    {/* Original content */}
+    <p className="text-slate-700 leading-relaxed">
+      {candidate.about || candidate.summary || 'No professional summary provided.'}
+    </p>
+  </CardContent>
+</Card>
 
+              {/* Skills */}
               <Card>
                 <CardHeader>
                   <CardTitle>Skills & Expertise</CardTitle>
@@ -309,6 +262,7 @@ const CandidateProfile: React.FC = () => {
                 </CardContent>
               </Card>
 
+              {/* Skill Gap Analysis */}
               <Card>
                 <CardHeader>
                   <CardTitle>Skill Gap Analysis</CardTitle>
@@ -350,18 +304,19 @@ const CandidateProfile: React.FC = () => {
               </Card>
             </div>
 
+            {/* Right Column */}
             <div className="space-y-6">
+              {/* Contact Information */}
               <Card>
                 <CardHeader>
                   <CardTitle>Contact Information</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <Button
-                    asChild
-                    className="w-full bg-black text-white"
+                    className="w-full bg-black text-white hover:bg-gray-800"
                     onClick={() => {
                       const email = candidate.email;
-                      if (email) {
+                      if (email && email !== 'N/A') {
                         window.open(
                           `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email)}`,
                           '_blank'
@@ -371,10 +326,8 @@ const CandidateProfile: React.FC = () => {
                       }
                     }}
                   >
-                    <a>
-                      <Mail className="w-4 h-4 mr-2" />
-                      Contact Candidate
-                    </a>
+                    <Mail className="w-4 h-4 mr-2" />
+                    Contact Candidate
                   </Button>
                   <div className="text-sm text-slate-600 space-y-2">
                     <div className="flex items-center">
@@ -383,14 +336,19 @@ const CandidateProfile: React.FC = () => {
                     </div>
                     <div className="flex items-center">
                       <Mail className="w-4 h-4 mr-2" />
-                      {candidate.email || 'No email provided'}
+                      {candidate.email && candidate.email !== 'N/A' ? candidate.email : 'No email provided'}
                     </div>
                     {candidate.linkedinUrl && (
                       <div className="flex items-center">
                         <svg className="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                           <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
                         </svg>
-                        <a href={candidate.linkedinUrl} target="_blank" rel="noopener noreferrer">
+                        <a 
+                          href={candidate.linkedinUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline"
+                        >
                           LinkedIn Profile
                         </a>
                       </div>
@@ -399,6 +357,7 @@ const CandidateProfile: React.FC = () => {
                 </CardContent>
               </Card>
 
+              {/* Quick Stats */}
               <Card>
                 <CardHeader>
                   <CardTitle>Quick Stats</CardTitle>
@@ -412,37 +371,18 @@ const CandidateProfile: React.FC = () => {
                   </div>
                   <div>
                     <span className="font-medium text-slate-600">Education:</span>
-                    <div className="text-slate-900 flex items-center">
-                      <GraduationCap className="w-4 h-4 mr-2" />
-                      {Array.isArray(candidate.education) ? (
-                        candidate.education.length > 0 ? (
-                          <span>
-                            {candidate.education.map((edu, idx, arr) => (
-                              <span key={idx}>
-                                <span className="font-semibold">{edu.school}</span>
-                                {edu.degree && `, ${edu.degree}`}
-                                {edu.description && ` - ${edu.description}`}
-                                {idx < arr.length - 1 ? '; ' : ''}
-                              </span>
-                            ))}
-                          </span>
-                        ) : (
-                          <span className="italic text-slate-500">No education listed</span>
-                        )
-                      ) : typeof candidate.education === 'object' && candidate.education !== null ? (
-                        <span>
-                          <span className="font-semibold">{candidate.education.school}</span>
-                          {candidate.education.degree && `, ${candidate.education.degree}`}
-                          {candidate.education.description && ` - ${candidate.education.description}`}
-                        </span>
-                      ) : (
-                        <span>{candidate.education || 'Not specified'}</span>
-                      )}
-                    </div>
+                    <p className="text-slate-900">
+                      <GraduationCap className="w-4 h-4 inline mr-2" />
+                      {typeof candidate.education === 'string' 
+                        ? candidate.education 
+                        : 'Not specified'}
+                    </p>
                   </div>
                   <div>
                     <span className="font-medium text-slate-600">Availability:</span>
-                    <p className="text-slate-900">{candidate.availability || 'Not specified'}</p>
+                    <p className="text-slate-900">
+                      {candidate.availability || 'Not specified'}
+                    </p>
                   </div>
                 </CardContent>
               </Card>

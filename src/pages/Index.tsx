@@ -182,8 +182,8 @@ const IndexPageContent = () => {
   // Show loading state during authentication check
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="inline-flex items-center space-x-3 px-6 py-3 bg-white rounded-full shadow-lg">
+      <div className="max-w-7xl mx-auto mb-16 px-2 sm:px-4 relative">
+        <div className="relative overflow-hidden">
           <div className="w-6 h-6 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
           <span className="text-lg font-medium text-slate-700">
             Loading...

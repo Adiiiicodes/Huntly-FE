@@ -1,5 +1,4 @@
 import { Candidate } from '@/types/candidate';
-import { useAuth } from '@/contexts/AuthContext';
 import { fetchWithAuth } from '@/services/fetchWithAuth';
 
 interface RawCandidate {
@@ -7,18 +6,19 @@ interface RawCandidate {
   id?: string;
   fullName?: string;
   name?: string;
+  about?: string;
   jobTitle?: string;
   title?: string;
   addressWithCountry?: string;
   location?: string;
   experienceYears?: number | string;
-  skills?: string[];
+  skills?: string[] | Array<{ title: string }>;
   availability?: string;
   matchScore?: number;
   summary?: string;
   avatar?: string;
   salary?: string;
-  education?: string;
+  education?: string | Array<{ school: string; degree?: string; description?: string }> | { school: string; degree?: string; description?: string };
   linkedinUrl?: string;
   email?: string;
 }
@@ -28,13 +28,11 @@ export const candidateService = {
     try {
       console.log('Starting candidate search for query:', query);
       
-      // Step 1: Get initial candidates from chat API
       let candidates: RawCandidate[] = [];
       
       try {
         console.log('Calling chat API with query:', query);
         
-        // Use fetchWithAuth instead of fetch to ensure authentication
         const chatResponse = await fetchWithAuth('/api/chat', {
           method: 'POST',
           body: JSON.stringify({
@@ -42,58 +40,70 @@ export const candidateService = {
           })
         });
         
-        // fetchWithAuth handles the error cases, so we don't need to check response.ok
-        const chatData = chatResponse;
-        console.log('Chat API response received');
+        console.log('Chat API raw response:', chatResponse);
         
-        if (!chatData || !chatData.answer) {
-          console.error('Invalid chat API response:', chatData);
+        if (!chatResponse || !chatResponse.answer) {
+          console.error('Invalid chat API response:', chatResponse);
           throw new Error('Chat API did not return expected data');
         }
         
-        // If answer is a string that looks like JSON, parse it
-        if (typeof chatData.answer === 'string') {
+        // Handle different response formats
+        if (typeof chatResponse.answer === 'string') {
           try {
-            const parsedCandidates = JSON.parse(chatData.answer);
-            if (Array.isArray(parsedCandidates)) {
-              candidates = parsedCandidates;
-              console.log(`Successfully parsed ${candidates.length} candidates from chat API`);
+            // Try to parse as JSON first
+            const parsed = JSON.parse(chatResponse.answer);
+            if (Array.isArray(parsed)) {
+              candidates = parsed;
+            } else if (parsed.candidates && Array.isArray(parsed.candidates)) {
+              candidates = parsed.candidates;
             } else {
-              console.error('Chat API returned non-array data:', parsedCandidates);
-              throw new Error('Chat API did not return an array of candidates');
+              console.error('Unexpected parsed structure:', parsed);
+              candidates = [];
             }
           } catch (parseError) {
-            console.error('Failed to parse candidates from chat API:', parseError);
-            throw new Error('Could not parse candidate data from chat API');
+            console.error('Failed to parse as JSON, response might be HTML:', chatResponse.answer.substring(0, 200));
+            candidates = [];
           }
-        } else if (Array.isArray(chatData.answer)) {
-          // If answer is directly an array
-          candidates = chatData.answer;
-          console.log(`Got ${candidates.length} candidates directly from chat API`);
+        } else if (Array.isArray(chatResponse.answer)) {
+          candidates = chatResponse.answer;
+        } else if (chatResponse.candidates && Array.isArray(chatResponse.candidates)) {
+          candidates = chatResponse.candidates;
         } else {
-          console.error('Unexpected answer format from chat API:', chatData.answer);
-          throw new Error('Chat API returned unexpected data format');
+          console.error('Unexpected answer format:', chatResponse.answer);
+          candidates = [];
         }
+        
+        console.log(`Successfully extracted ${candidates.length} candidates from chat API`);
+        
       } catch (chatError) {
         console.error('Error fetching from chat API:', chatError);
         throw chatError;
       }
       
-      // Step 2: Format candidates for display
-      return candidates.map(formatCandidate);
+      // Format and log each candidate for debugging
+      const formattedCandidates = candidates.map((candidate, index) => {
+        console.log(`Raw candidate ${index}:`, candidate);
+        const formatted = formatCandidate(candidate);
+        console.log(`Formatted candidate ${index}:`, formatted);
+        return formatted;
+      });
+      
+      return formattedCandidates;
       
     } catch (error) {
       console.error('Candidate search failed:', error);
-      
-      // Return empty array on error
       return [];
     }
   }
 };
 
-// Helper function to format candidate data for the CandidateCard component
 function formatCandidate(candidate: RawCandidate): Candidate {
-  return {
+  // Debug: Log what fields are actually present
+  console.log('Formatting candidate with fields:', Object.keys(candidate));
+  console.log('About field value:', candidate.about);
+  console.log('Summary field value:', candidate.summary);
+  
+  const formatted: Candidate = {
     id: candidate._id || candidate.id || Math.random().toString(36).substring(2),
     _id: candidate._id || candidate.id || Math.random().toString(36).substring(2),
     fullName: candidate.fullName || candidate.name || 'N/A',
@@ -102,16 +112,37 @@ function formatCandidate(candidate: RawCandidate): Candidate {
     experienceYears: typeof candidate.experienceYears === 'number' 
       ? candidate.experienceYears 
       : (typeof candidate.experienceYears === 'string' 
-        ? parseFloat(candidate.experienceYears) 
+        ? parseFloat(candidate.experienceYears) || 0 
         : 0),
-    skills: Array.isArray(candidate.skills) ? candidate.skills : [],
+    skills: formatSkills(candidate.skills),
     availability: candidate.availability || 'Unknown',
     matchScore: typeof candidate.matchScore === 'number' ? candidate.matchScore : 0,
-    summary: candidate.summary || '',
-    avatar: candidate.avatar || `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(candidate.fullName || candidate.id || 'user')}`,
+    // Ensure both fields are populated
+    summary: candidate.summary || candidate.about || '',
+    about: candidate.about || candidate.summary || '',
+    avatar: candidate.avatar || `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(candidate.fullName || candidate.name || candidate.id || 'user')}`,
     salary: candidate.salary || 'N/A',
     education: candidate.education || 'N/A',
     linkedinUrl: candidate.linkedinUrl || '',
     email: candidate.email || 'N/A',
   };
+  
+  console.log('Formatted candidate about field:', formatted.about);
+  console.log('Formatted candidate summary field:', formatted.summary);
+  
+  return formatted;
+}
+
+function formatSkills(skills: any): string[] {
+  if (!skills) return [];
+  
+  if (Array.isArray(skills)) {
+    return skills.map(skill => {
+      if (typeof skill === 'string') return skill;
+      if (skill && typeof skill === 'object' && skill.title) return skill.title;
+      return '';
+    }).filter(Boolean);
+  }
+  
+  return [];
 }
