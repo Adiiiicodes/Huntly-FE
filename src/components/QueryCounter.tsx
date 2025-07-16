@@ -13,7 +13,7 @@ export default function QueryCounter() {
   const eventSourceRef = useRef<EventSource | null>(null);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://huntly-be-880043945889.asia-south1.run.app8';
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || ' https://huntly-be-880043945889.asia-south1.run.app';
 
   // Function to poll for updates
   const pollForUpdates = () => {

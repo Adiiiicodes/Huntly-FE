@@ -1,12 +1,12 @@
-'''import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
 // Utility to handle backend API requests
 export async function handleApiRequest(path: string, options: RequestInit) {
   try {
-    const apiUrl = process.env.API_BASE_URL || 'http://168.231.122.158';
-    const response = await fetch(`${apiUrl}${pathttps://huntly-be-880043945889.asia-south1.run.app
+    const apiUrl = process.env.API_BASE_URL || 'https://huntly-be-880043945889.asia-south1.run.app';
+    const response = await fetch(`${apiUrl}${path}`, options);
 
-    const text = await response.text();https://huntly-be-880043945889.asia-south1.run.app
+    const text = await response.text();
     let data;
 
     try {

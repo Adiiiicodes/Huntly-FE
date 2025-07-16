@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     // Use ranker backend API URL
     const apiUrl =
       process.env.API_BASE_URL ||
-      'https://huntly-be-880043945889.asia-south1.run.app8';
+      ' https://huntly-be-880043945889.asia-south1.run.app';
 
     const body = await request.json();
 

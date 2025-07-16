@@ -34,14 +34,14 @@ export async function fetchCandidates(query: string): Promise<Candidate[]> {
     
     // Then use it to fetch candidates using POST
     // Make sure to use the full URL for external API calls
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://168.231.122.158';
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://huntly-be-880043945889.asia-south1.run.app';
     const response = await fetch(
       `${apiBaseUrl}/api/candidates/search`, 
       {
-        method: 'POST',https://huntly-be-880043945889.asia-south1.run.app
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json'
-        },https://huntly-be-880043945889.asia-south1.run.app
+        }, 
         body: JSON.stringify({
           query: query,
           initialResponse: initialResponse
