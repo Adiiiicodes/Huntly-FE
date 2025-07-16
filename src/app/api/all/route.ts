@@ -14,7 +14,7 @@ export async function OPTIONS() {
 
 export async function GET() {
   try {
-    const apiUrl = process.env.API_BASE_URL || 'http://168.231.122.158';
+    const apiUrl = process.env.API_BASE_URL || 'https://huntly-be-880043945889.asia-south1.run.app8';
 
     console.log('Proxying GET to:', `${apiUrl}/api/candidates/all`);
 

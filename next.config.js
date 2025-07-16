@@ -16,7 +16,7 @@ const nextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: 'http://168.231.122.158/api/:path*',
+        destination: 'https://huntly-be-880043945889.asia-south1.run.app8/api/:path*',
       },
     ];
   },

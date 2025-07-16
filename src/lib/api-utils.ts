@@ -4,9 +4,9 @@
 export async function handleApiRequest(path: string, options: RequestInit) {
   try {
     const apiUrl = process.env.API_BASE_URL || 'http://168.231.122.158';
-    const response = await fetch(`${apiUrl}${path}`, options);
+    const response = await fetch(`${apiUrl}${pathttps://huntly-be-880043945889.asia-south1.run.app
 
-    const text = await response.text();
+    const text = await response.text();https://huntly-be-880043945889.asia-south1.run.app
     let data;
 
     try {

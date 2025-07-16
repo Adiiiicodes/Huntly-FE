@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   description: 'Find the perfect talent with AI-powered search. Search professionals by skills, location, and experience.',
   keywords: 'people search, talent search, professional finder, developer search, blockchain experts, AI talent',
   authors: [{ name: 'HuntLy Team' }],
-  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'http://168.231.122.158'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://huntly-be-880043945889.asia-south1.run.app8'),
   openGraph: {
     title: 'HuntLy - Smart People Search Engine',
     description: 'Find the perfect talent with AI-powered search',

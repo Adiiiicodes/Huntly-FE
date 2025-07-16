@@ -1,7 +1,7 @@
 import { LoginRequest, AuthResponse } from '../types/auth';
 
 // Get the API URL from environment or use the IP as fallback
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://168.231.122.158';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://huntly-be-880043945889.asia-south1.run.app8';
 
 /**
  * Enhanced login function with comprehensive error handling and CORS fixes

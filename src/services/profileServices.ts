@@ -18,7 +18,7 @@ interface SavedProfile {
     savedProfiles?: string[];
   }
   
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://168.231.122.158';
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://huntly-be-880043945889.asia-south1.run.app8';
   
   /**
    * Fetch all saved profiles for the current user

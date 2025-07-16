@@ -38,10 +38,10 @@ export async function fetchCandidates(query: string): Promise<Candidate[]> {
     const response = await fetch(
       `${apiBaseUrl}/api/candidates/search`, 
       {
-        method: 'POST',
+        method: 'POST',https://huntly-be-880043945889.asia-south1.run.app
         headers: {
           'Content-Type': 'application/json'
-        },
+        },https://huntly-be-880043945889.asia-south1.run.app
         body: JSON.stringify({
           query: query,
           initialResponse: initialResponse
