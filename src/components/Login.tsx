@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useState, useEffect, Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -259,7 +260,7 @@ const LoginWithParams = () => {
           {/* Footer */}
           <div className="text-center mt-8">
             <p className="text-xs text-gray-500">
-              © SquareUI design system All Rights Reserved.
+              © Huntly, All Rights Reserved.
             </p>
           </div>
         </div>
@@ -268,21 +269,13 @@ const LoginWithParams = () => {
       {/* Right side - Image Placeholder */}
       <div className="hidden lg:flex flex-1 bg-gradient-to-br from-blue-50 to-indigo-100 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-100/30 to-indigo-200/30"></div>
-        
-        {/* Image Placeholder - Replace this div with your actual image */}
-        <div className="flex-1 flex items-center justify-center p-8 relative z-10">
-          <div className="w-full h-full max-w-lg max-h-96 bg-white/20 backdrop-blur-sm rounded-2xl border border-white/30 flex items-center justify-center">
-            <div className="text-center text-gray-600">
-              <div className="w-16 h-16 bg-gray-300 rounded-full mx-auto mb-4 flex items-center justify-center">
-                <svg className="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <p className="text-lg font-medium">Image Placeholder</p>
-              <p className="text-sm opacity-75">Replace with your AI hiring image</p>
-            </div>
-          </div>
-        </div>
+        <Image
+          src="/AuthAssets/login.jpg"
+          fill
+          alt="Login illustration"
+          className="object-cover"
+          priority
+        />
 
         {/* Decorative elements */}
         <div className="absolute top-20 right-20 w-32 h-32 bg-blue-200/30 rounded-full blur-3xl"></div>

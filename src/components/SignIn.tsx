@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image'
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -279,7 +280,7 @@ const SignIn = () => {
           {/* Footer */}
           <div className="text-center mt-8">
             <p className="text-xs text-gray-500">
-              © SquareUI design system All Rights Reserved.
+              © Huntly All Rights Reserved.
             </p>
           </div>
         </div>
@@ -288,21 +289,14 @@ const SignIn = () => {
       {/* Right side - Image Placeholder */}
       <div className="hidden lg:flex flex-1 bg-gradient-to-br from-purple-50 to-pink-100 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-purple-100/30 to-pink-200/30"></div>
+        <Image
+          src="/AuthAssets/signup.jpg"
+          fill
+          alt="Login illustration"
+          className="object-cover"
+          priority
+        />
         
-        {/* Image Placeholder - Replace this div with your actual image */}
-        <div className="flex-1 flex items-center justify-center p-8 relative z-10">
-          <div className="w-full h-full max-w-lg max-h-96 bg-white/20 backdrop-blur-sm rounded-2xl border border-white/30 flex items-center justify-center">
-            <div className="text-center text-gray-600">
-              <div className="w-16 h-16 bg-gray-300 rounded-full mx-auto mb-4 flex items-center justify-center">
-                <svg className="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-              </div>
-              <p className="text-lg font-medium">Sign Up Image Placeholder</p>
-              <p className="text-sm opacity-75">Replace with your AI hiring team image</p>
-            </div>
-          </div>
-        </div>
 
         {/* Decorative elements */}
         <div className="absolute top-20 right-20 w-32 h-32 bg-purple-200/30 rounded-full blur-3xl"></div>
